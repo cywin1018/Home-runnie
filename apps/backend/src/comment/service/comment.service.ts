@@ -41,10 +41,12 @@ export class CommentService {
       throw new NotFoundException('댓글 생성에 실패했습니다.');
     }
 
+    const authorProfile = await this.commentRepository.findAuthorProfile(memberId);
+
     return {
       id: created.id,
       content: created.content,
-      authorNickname: null,
+      authorNickname: authorProfile?.nickname ?? null,
       createdAt: created.createdAt.toISOString(),
     };
   }

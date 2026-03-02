@@ -47,6 +47,17 @@ export class CommentRepository {
     return created ?? null;
   }
 
+  async findAuthorProfile(memberId: number) {
+    const [profile] = await this.db
+      .select({
+        nickname: Profile.nickname,
+      })
+      .from(Profile)
+      .where(and(eq(Profile.memberId, memberId), eq(Profile.deleted, false)));
+
+    return profile ?? null;
+  }
+
   async existsRecruitmentPost(postId: number) {
     const [post] = await this.db
       .select({ id: Post.id })
