@@ -7,6 +7,8 @@ import { TicketingType } from '@/common/enums/ticketing-type.enum';
 import { PreferGender } from '@/common/enums/prefer-gender.enum';
 import { Stadium } from '@/common/enums/stadium.enum';
 import { Team } from '@/common/enums/team.enum';
+import { Member } from '@/member/domain';
+import { Profile } from '@/member/domain/profile.entity';
 import { DATABASE_CONNECTION } from '@/common';
 import { and, count, desc, eq, sql } from 'drizzle-orm';
 
@@ -29,6 +31,7 @@ export class PostRepository {
     message: string | null,
     ticketingType: TicketingType | null,
     supportTeam: Team | null,
+    picked: string[] | null,
   ) {
     // Post 생성
     const [post] = await this.db
@@ -57,6 +60,7 @@ export class PostRepository {
         teamAway: teamAway.toString(),
         recruitmentLimit,
         preferGender,
+        picked,
         message: message || null,
         ticketingType: ticketingType || null,
         supportTeam: supportTeam?.toString() || null,
@@ -104,7 +108,10 @@ export class PostRepository {
     const [post] = await this.db
       .select({
         id: Post.id,
+        authorId: Post.authorId,
         title: Post.title,
+        postStatus: Post.postStatus,
+        authorNickname: Profile.nickname,
         gameDate: RecruitmentDetail.gameDate,
         gameTime: RecruitmentDetail.gameTime,
         stadium: RecruitmentDetail.stadium,
@@ -112,7 +119,9 @@ export class PostRepository {
         teamAway: RecruitmentDetail.teamAway,
         recruitmentLimit: RecruitmentDetail.recruitmentLimit,
         currentParticipants: RecruitmentDetail.currentParticipants,
+        gender: Member.gender,
         preferGender: RecruitmentDetail.preferGender,
+        picked: RecruitmentDetail.picked,
         message: RecruitmentDetail.message,
         ticketingType: RecruitmentDetail.ticketingType,
         supportTeam: RecruitmentDetail.supportTeam,
@@ -120,8 +129,26 @@ export class PostRepository {
       })
       .from(Post)
       .innerJoin(RecruitmentDetail, eq(Post.id, RecruitmentDetail.postId))
+      .innerJoin(Member, eq(Post.authorId, Member.id))
+      .leftJoin(Profile, eq(Profile.memberId, Member.id))
       .where(and(eq(Post.id, postId), eq(Post.post_type, PostType.RECRUITMENT)));
 
     return post ?? null;
+  }
+
+  async updateRecruitmentPostStatus(
+    postId: number,
+    postStatus: PostStatusEnum.ACTIVE | PostStatusEnum.CLOSE,
+  ) {
+    const [updated] = await this.db
+      .update(Post)
+      .set({ postStatus, updatedAt: new Date() })
+      .where(and(eq(Post.id, postId), eq(Post.post_type, PostType.RECRUITMENT)))
+      .returning({
+        id: Post.id,
+        postStatus: Post.postStatus,
+      });
+
+    return updated ?? null;
   }
 }
