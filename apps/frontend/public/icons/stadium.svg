@@ -1,0 +1,19 @@
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="17" y="7" width="1" height="2" fill="#7A7D82"/>
+<rect x="10" y="7" width="1" height="2" fill="#7A7D82"/>
+<path d="M3 12C3 12 4 16 14 16C24 16 25 12 25 12V20C25 20 25 25 14 25C3 25 3 20 3 20V12Z" fill="#DDDEE0"/>
+<ellipse cx="14" cy="12" rx="11" ry="4" fill="#AAACB2"/>
+<mask id="mask0_1201_18754" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="3" y="8" width="22" height="8">
+<ellipse cx="14" cy="12" rx="11" ry="4" fill="#3B4778"/>
+</mask>
+<g mask="url(#mask0_1201_18754)">
+<ellipse cx="14" cy="14.5" rx="7" ry="2.5" fill="#0ABF00"/>
+</g>
+<rect x="10.15" y="3.15" width="7.7" height="3.7" fill="#434448" stroke="#7A7D82" stroke-width="0.3"/>
+<mask id="mask1_1201_18754" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="3" y="12" width="22" height="13">
+<path d="M3 12C3 12 4 16 14 16C24 16 25 12 25 12V20C25 20 25 25 14 25C3 25 3 20 3 20V12Z" fill="#DDDEE0"/>
+</mask>
+<g mask="url(#mask1_1201_18754)">
+<rect x="10" y="18" width="8" height="9" fill="#AAACB2"/>
+</g>
+</svg>
