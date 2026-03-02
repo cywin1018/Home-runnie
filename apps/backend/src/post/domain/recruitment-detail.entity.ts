@@ -18,9 +18,9 @@ export const RecruitmentDetail = pgTable('recruitment_detail', {
   recruitmentLimit: integer('recruitment_limit').notNull().default(1),
   currentParticipants: integer('current_participants').notNull().default(0),
   preferGender: preferGenderPgEnum('prefer_gender').notNull().default('ANY'),
+  picked: text('picked').array(),
   message: text('message'),
   ticketingType: ticketingTypePgEnum('ticketing_type'),
-  // my_preference: text('my_preference'), 얘도 아직 미정
   postId: integer('post_id')
     .notNull()
     .unique()

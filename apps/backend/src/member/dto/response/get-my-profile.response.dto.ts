@@ -6,6 +6,13 @@ import { Team } from '@homerunnie/shared';
 
 export class GetMyProfileResponseDto implements GetMyProfileResponse {
   @ApiProperty({
+    description: '회원 ID',
+    type: 'integer',
+    example: 1,
+  })
+  memberId: number;
+
+  @ApiProperty({
     description: '닉네임',
     type: 'string',
     example: '야구왕타돌이',
@@ -47,6 +54,7 @@ export class GetMyProfileResponseDto implements GetMyProfileResponse {
     warns: (typeof Warn.$inferSelect)[],
   ): GetMyProfileResponseDto {
     const response = new GetMyProfileResponseDto();
+    response.memberId = member.id;
     response.nickname = profile.nickname;
     response.supportTeam = profile.supportTeam as Team;
     response.oauthProvider = member.oauthProvider;

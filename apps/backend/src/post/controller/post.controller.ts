@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
 import { UseGuards } from '@nestjs/common';
 import { PostService } from '@/post/service';
 import {
@@ -6,6 +6,8 @@ import {
   CreateRecruitmentPostResponseDto,
   GetRecruitmentPostDetailResponseDto,
   GetRecruitmentPostsResponseDto,
+  UpdateRecruitmentPostStatusRequestDto,
+  UpdateRecruitmentPostStatusResponseDto,
 } from '@/post/dto';
 import { CurrentMember } from '@/common';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
@@ -38,5 +40,15 @@ export class PostController {
     @Param('postId', ParseIntPipe) postId: number,
   ): Promise<GetRecruitmentPostDetailResponseDto> {
     return this.postService.getRecruitmentPostDetail(postId);
+  }
+
+  @Patch('recruitment/:postId/status')
+  @UseGuards(JwtAuthGuard)
+  async updateRecruitmentPostStatus(
+    @CurrentMember() memberId: number,
+    @Param('postId', ParseIntPipe) postId: number,
+    @Body() dto: UpdateRecruitmentPostStatusRequestDto,
+  ): Promise<UpdateRecruitmentPostStatusResponseDto> {
+    return this.postService.updateRecruitmentPostStatus(memberId, postId, dto);
   }
 }
