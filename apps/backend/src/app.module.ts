@@ -14,6 +14,7 @@ import { AdminModule } from '@/admin/admin.module';
 import { WarnModule } from '@/warn/warn.module';
 import { ChatModule } from '@/chat/chat.module';
 import { CommentModule } from '@/comment/comment.module';
+import { HealthModule } from '@/health/health.module';
 import databaseConfig from '@/common/config/database.config';
 import * as path from 'path';
 
@@ -35,6 +36,7 @@ import * as path from 'path';
     AdminModule,
     ChatModule,
     CommentModule,
+    HealthModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: HttpExceptionFilter },
