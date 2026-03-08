@@ -1,9 +1,13 @@
-name: jikgwan
+name: jikgwan-backend
 
 services:
-  postgres:
-    image: postgres
+  backend:
+    build:
+      context: ../../
+      dockerfile: apps/backend/Dockerfile
     ports:
-      - 5432:5432
+      - 3030:3030
+    environment:
+      - NODE_ENV=production
     env_file:
-      - ./secret/.env.postgresql
+      - ./secret/.env

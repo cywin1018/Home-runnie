@@ -30,7 +30,7 @@ async function bootstrap() {
   );
 
   SwaggerConfig.setUp(app);
-  await app.listen(port ?? 3030);
+  await app.listen(port ?? 3030, '0.0.0.0');
 }
 
 bootstrap();
