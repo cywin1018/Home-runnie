@@ -1,0 +1,17 @@
+name: jikgwan
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    ports:
+      - 3030:3030
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=host.docker.internal
+      - DATABASE_URL=postgresql://postgres:1234@host.docker.internal:5432/jikgwan
+    env_file:
+      - ./apps/backend/secret/.env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
