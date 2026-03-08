@@ -3,13 +3,15 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
-# 1단계: 프로젝트에 필요한 애플리케이션 종속성만 계산
-FROM base AS builder
 # node-gyp 또는 기타 네이티브 종속성이 필요한 경우(pg 등)
+FROM base AS deps
 RUN apk add --no-cache libc6-compat \
     python3 \
     make \
     g++
+
+# 1단계: 프로젝트에 필요한 애플리케이션 종속성만 계산
+FROM deps AS builder
 
 WORKDIR /app
 RUN npm i -g turbo
@@ -18,11 +20,7 @@ COPY . .
 RUN turbo prune @homerunnie/backend --docker
 
 # 2단계: 패키지 설치
-FROM base AS installer
-RUN apk add --no-cache libc6-compat \
-    python3 \
-    make \
-    g++
+FROM deps AS installer
 WORKDIR /app
 
 # lockfile이 변경되지 않는 한 캐시 재사용
