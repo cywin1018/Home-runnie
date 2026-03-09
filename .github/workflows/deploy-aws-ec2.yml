@@ -119,26 +119,38 @@ jobs:
           target: '~/jikgwan'
           strip_components: 3 # apps/backend/secret 경로를 제거하고 .env 파일만 전송
 
-      # 5. EC2에 배포 (SSH 사용)
+      # 5. ECR 로그인 비밀번호 추출 (Runner 환경에서)
+      - name: Get ECR Login Password
+        id: ecr-pass
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          echo "password=$(aws ecr get-login-password --region $AWS_REGION)" >> $GITHUB_OUTPUT
+
+      # 6. EC2에 배포 (SSH 사용)
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          ECR_PASSWORD: ${{ steps.ecr-pass.outputs.password }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          envs: ECR_REGISTRY,ECR_REPOSITORY,ECR_PASSWORD
           script: |
             mkdir -p ~/jikgwan
             cd ~/jikgwan
 
-            # 1. ECR 로그인
-            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+            # 1. ECR 로그인 (AWS CLI 필요없음, 환경변수로 넘겨받은 패스워드 사용)
+            echo "$ECR_PASSWORD" | docker login --username AWS --password-stdin $ECR_REGISTRY
 
             # 2. docker-compose.prod.yaml 생성 (ECR 이미지 경로 반영)
             cat <<EOF > docker-compose.prod.yaml
-            version: '3.8'
             services:
               backend:
-                image: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest
+                image: $ECR_REGISTRY/$ECR_REPOSITORY:latest
                 container_name: jikgwan-backend
                 ports:
                   - "3030:3030"
