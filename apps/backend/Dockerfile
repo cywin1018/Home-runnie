@@ -44,7 +44,7 @@ COPY --from=installer /app .
 # NestJS 서버 환경변수 (런타임 시 docker-compose에서 주입)
 # ENV NODE_ENV=production
 
-EXPOSE 3000
+EXPOSE 3030
 
 # 프로젝트 위치로 이동 (워크스페이스 환경이므로 apps/backend 위치)
 WORKDIR /app/apps/backend

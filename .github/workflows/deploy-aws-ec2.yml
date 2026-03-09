@@ -1,0 +1,100 @@
+name: Deploy to AWS EC2 (Ubuntu)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/backend/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'pnpm-workspace.yaml'
+      - 'turbo.json'
+  pull_request:
+    branches: ['main']
+    paths:
+      - 'apps/backend/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'pnpm-workspace.yaml'
+      - 'turbo.json'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          submodules: true # secret 폴더가 서브모듈인 경우 필수
+          token: ${{ secrets.PRIVATE_SUBMODULE_TOKEN }}
+
+      # 1. AWS 인증 설정
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # 2. AWS ECR 로그인
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # 3. Docker 이미지 빌드 및 푸시
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f apps/backend/Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      # 4. .env 파일을 서버로 전송 (apps/backend/secret/.env -> ~/jikgwan/.env)
+      - name: Copy .env to EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: 'apps/backend/secret/.env'
+          target: '~/jikgwan'
+          strip_components: 3 # apps/backend/secret 경로를 제거하고 .env 파일만 전송
+
+      # 5. EC2에 배포 (SSH 사용)
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            mkdir -p ~/jikgwan
+            cd ~/jikgwan
+
+            # 1. ECR 로그인
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.registry }}
+
+            # 2. docker-compose.prod.yaml 생성 (ECR 이미지 경로 반영)
+            cat <<EOF > docker-compose.prod.yaml
+            version: '3.8'
+            services:
+              backend:
+                image: ${{ steps.login-ecr.registry }}/${{ secrets.ECR_REPOSITORY }}:latest
+                container_name: jikgwan-backend
+                ports:
+                  - "3030:3030"
+                env_file:
+                  - .env
+                restart: always
+            EOF
+
+            # 3. 이미지 풀 및 컨테이너 재시작
+            docker compose -f docker-compose.prod.yaml pull
+            docker compose -f docker-compose.prod.yaml up -d
+
+            # 4. 미사용 이미지 정리 (용량 확보)
+            docker image prune -f
