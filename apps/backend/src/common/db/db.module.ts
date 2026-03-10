@@ -17,6 +17,9 @@ import * as schema from '@/common/db/schema';
         const pool = new Pool({
           connectionString: configService.getOrThrow('DATABASE_URL'),
           max: isMigrating || isSeeding ? 1 : 10,
+          ssl: {
+            rejectUnauthorized: false,
+          },
         });
 
         return drizzle(pool, {
