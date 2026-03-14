@@ -110,7 +110,7 @@ export default function TeamDropdown({
                   onClick={() => select(item.value)}
                   aria-selected={isSelected}
                   className={clsx(
-                    'relative h-14 w-full px-5 text-left',
+                    'relative h-14 w-full px-5 text-left cursor-pointer',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300',
                     isSelected ? 'bg-neutral-50' : 'hover:bg-neutral-50',
                   )}

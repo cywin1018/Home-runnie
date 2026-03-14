@@ -17,7 +17,7 @@ export default function RecruitmentListPage() {
   const posts = data?.data ?? [];
 
   return (
-    <div className="max-w-[1440px] mx-auto px-4 py-10 md:px-[120px]">
+    <div className="py-10">
       <h1 className="text-t02-sb mb-6">전체 모집글</h1>
 
       <div className="w-full flex flex-col">

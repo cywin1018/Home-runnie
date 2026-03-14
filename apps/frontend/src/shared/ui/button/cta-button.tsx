@@ -15,7 +15,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
  * ※ 색상은 전부 디자인 토큰/팔레트 기준 (Tailwind v4 변수)
  */
 const ctaVariants = cva(
-  'inline-flex items-center justify-center rounded-xl transition-colors select-none ' +
+  'inline-flex items-center justify-center rounded-xl transition-colors select-none cursor-pointer ' +
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ' +
     'disabled:cursor-not-allowed',
   {

@@ -146,8 +146,8 @@ export default function RecruitmentPostDetailPage() {
   );
 
   return (
-    <div className="min-h-screen py-10">
-      <div className="mx-auto max-w-[1440px] px-4 md:px-[120px]">
+    <div className="py-10">
+      <div>
         <p className="mb-2 text-b02-sb text-gray-600">제목</p>
         <div className="mb-10 flex items-start justify-between gap-4">
           <h1 className="text-t00 font-bold leading-tight text-gray-900">{data.title}</h1>

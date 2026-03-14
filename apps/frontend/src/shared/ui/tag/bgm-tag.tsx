@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@/lib/utils";
+import React from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '@/lib/utils';
 
 const BgmIcon = ({ className, ...props }: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -41,24 +41,24 @@ const BgmIcon = ({ className, ...props }: React.SVGProps<SVGSVGElement>) => (
 );
 
 const tagVariants = cva(
-  "inline-flex items-center gap-3 rounded-[100px] px-4 py-2 whitespace-nowrap w-auto select-none transition-colors outline outline-1 outline-offset-[-1px]",
+  'inline-flex items-center gap-3 rounded-[100px] px-4 py-2 whitespace-nowrap w-auto select-none transition-colors outline outline-1 outline-offset-[-1px] cursor-pointer',
   {
     variants: {
       state: {
-        default: "bg-neutral-100 outline-zinc-400 text-zinc-500",
-        selected: "bg-green-50 outline-main-green text-main-green",
+        default: 'bg-neutral-100 outline-zinc-400 text-zinc-500',
+        selected: 'bg-green-50 outline-main-green text-main-green',
       },
       size: {
-        sm: "text-sm",
-        md: "text-base",
-        lg: "text-lg",
+        sm: 'text-sm',
+        md: 'text-base',
+        lg: 'text-lg',
       },
     },
     defaultVariants: {
-      state: "default",
-      size: "md",
+      state: 'default',
+      size: 'md',
     },
-  }
+  },
 );
 
 export interface BgmTagProps
@@ -69,13 +69,13 @@ export interface BgmTagProps
 
 export const BgmTag = React.forwardRef<HTMLDivElement, BgmTagProps>(
   ({ className, text, selected = false, size, state, ...props }, ref) => {
-    const s = selected ? "selected" : (state ?? "default");
+    const s = selected ? 'selected' : (state ?? 'default');
     return (
       <div ref={ref} className={cn(tagVariants({ state: s, size }), className)} {...props}>
         <BgmIcon className="h-5 w-5 shrink-0" />
         <span className="font-normal">{text}</span>
       </div>
     );
-  }
+  },
 );
-BgmTag.displayName = "BgmTag";
+BgmTag.displayName = 'BgmTag';
