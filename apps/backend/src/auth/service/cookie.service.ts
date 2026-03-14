@@ -27,19 +27,28 @@ export class CookieService {
 
   createAccessTokenCookie(token: string) {
     return this.buildCookie('accessToken', token, {
-      maxAge: this.configService.get<number>('JWT_ACCESS_TOKEN_EXPIRATION_TIME'),
+      maxAge: parseInt(
+        this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRATION_TIME') as string,
+        10,
+      ),
     });
   }
 
   createRefreshTokenCookie(token: string) {
     return this.buildCookie('refreshToken', token, {
-      maxAge: this.configService.get<number>('JWT_REFRESH_TOKEN_EXPIRATION_TIME'),
+      maxAge: parseInt(
+        this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRATION_TIME') as string,
+        10,
+      ),
     });
   }
 
   createSignUpTokenCookie(token: string) {
     return this.buildCookie('signUpToken', token, {
-      maxAge: this.configService.get<number>('JWT_SIGNUP_TOKEN_EXPIRATION_TIME'),
+      maxAge: parseInt(
+        this.configService.get<string>('JWT_SIGNUP_TOKEN_EXPIRATION_TIME') as string,
+        10,
+      ),
     });
   }
 }
