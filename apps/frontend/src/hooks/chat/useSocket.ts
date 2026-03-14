@@ -10,7 +10,7 @@ export interface ChatMessage {
   nickname: string;
 }
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:3001';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
 
 export function useSocket(roomId: string) {
   const socketRef = useRef<Socket | null>(null);
@@ -23,10 +23,24 @@ export function useSocket(roomId: string) {
     });
     socketRef.current = socket;
 
-    socket.on('connect', () => {
+    socket.on('authenticated', () => {
       setConnected(true);
       socket.emit('join_room', { roomId });
     });
+
+    socket.on(
+      'message_history',
+      (history: { id: number; message: string; isOwn: boolean; createdAt: string }[]) => {
+        setMessages(
+          history.map((msg) => ({
+            id: msg.id,
+            text: msg.message,
+            sender: msg.isOwn ? 'me' : ('other' as const),
+            nickname: '',
+          })),
+        );
+      },
+    );
 
     socket.on('received_message', (data: { nickname: string; message: string; isOwn: boolean }) => {
       setMessages((prev) => [

@@ -14,6 +14,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { MemberRepository } from '@/member/repository';
+import { ChatRepository } from '@/chat/repository';
 import { JwtPayload } from '@/auth/types';
 
 interface SocketUser {
@@ -22,12 +23,12 @@ interface SocketUser {
   roomIds: Set<string>;
 }
 
-// origin *은 보안에 취약하기 때문에, 나중에 환경변수로 배포된 링크로 변경해야함
 @Injectable()
 @WebSocketGateway({
   namespace: 'chat',
   cors: {
-    origin: '*',
+    origin: process.env.LOCAL_FRONT ?? 'http://localhost:3000',
+    credentials: true,
   },
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -42,6 +43,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly memberRepository: MemberRepository,
+    private readonly chatRepository: ChatRepository,
   ) {}
 
   async handleConnection(socket: Socket) {
@@ -70,6 +72,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         roomIds: new Set<string>(),
       });
 
+      socket.emit('authenticated');
       this.logger.log(`client connected: ${profile.nickname} (${socket.id})`);
     } catch {
       socket.disconnect();
@@ -92,17 +95,30 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('join_room')
-  handleJoinRoom(@MessageBody() data: JoinRoomDto, @ConnectedSocket() socket: Socket) {
+  async handleJoinRoom(@MessageBody() data: JoinRoomDto, @ConnectedSocket() socket: Socket) {
     const user = this.users.get(socket.id);
     if (!user) return;
 
     const { roomId } = data;
     const { nickname } = user;
+    const chatRoomId = parseInt(roomId, 10);
 
     socket.join(roomId);
     user.roomIds.add(roomId);
 
-    this.server.to(roomId).emit('user_joined', {
+    // 이전 메시지 기록 조회 후 해당 소켓에만 전송
+    const history = await this.chatRepository.findMessagesByRoomId(chatRoomId);
+    socket.emit(
+      'message_history',
+      history.map((msg) => ({
+        id: msg.id,
+        message: msg.content,
+        isOwn: msg.senderId === user.memberId,
+        createdAt: msg.createdAt,
+      })),
+    );
+
+    socket.to(roomId).emit('user_joined', {
       nickname,
       message: `${nickname}님이 입장하셨습니다.`,
     });
@@ -111,7 +127,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('message')
-  handleMessage(@MessageBody() data: CreateMessageDto, @ConnectedSocket() socket: Socket) {
+  async handleMessage(@MessageBody() data: CreateMessageDto, @ConnectedSocket() socket: Socket) {
     const user = this.users.get(socket.id);
     const { message, roomId } = data;
 
@@ -119,7 +135,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
 
-    const { nickname } = user;
+    const { nickname, memberId } = user;
+    const chatRoomId = parseInt(roomId, 10);
+
+    // DB에 메시지 저장
+    await this.chatRepository.saveMessage(chatRoomId, memberId, message);
 
     socket.to(roomId).emit('received_message', {
       nickname,
