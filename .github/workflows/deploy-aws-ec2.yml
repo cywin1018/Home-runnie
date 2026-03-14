@@ -10,6 +10,7 @@ on:
       - 'package.json'
       - 'pnpm-workspace.yaml'
       - 'turbo.json'
+  # TODO: pull_request CI/CD 삭제
   pull_request:
     branches: ['main']
     paths:
