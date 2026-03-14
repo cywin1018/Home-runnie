@@ -8,9 +8,13 @@ import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
+
+  const corsOriginString = configService.get<string>('CORS_ORIGINS') || 'http://localhost:3000';
+  const corsOrigins = corsOriginString.split(',');
 
   app.enableCors({
-    origin: ['http://localhost:3000'],
+    origin: corsOrigins,
     credentials: true,
   });
 
@@ -18,7 +22,6 @@ async function bootstrap() {
 
   app.useWebSocketAdapter(new IoAdapter(app));
 
-  const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') ?? 3000;
 
   app.useGlobalPipes(

@@ -10,14 +10,6 @@ on:
       - 'package.json'
       - 'pnpm-workspace.yaml'
       - 'turbo.json'
-  pull_request:
-    branches: ['main']
-    paths:
-      - 'apps/backend/**'
-      - 'packages/**'
-      - 'package.json'
-      - 'pnpm-workspace.yaml'
-      - 'turbo.json'
 
 jobs:
   build-and-test:

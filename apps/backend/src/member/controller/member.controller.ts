@@ -24,7 +24,6 @@ export class MemberController {
   @CreateMemberSwagger
   async signUp(@Body() createMemberDto: CreateMemberRequestDto) {
     const { name, email } = createMemberDto;
-    // TODO : 바뀐 엔티티에 따라 다시 만들어야 함.
     await this.memberService.createMember(name, email);
   }
 
