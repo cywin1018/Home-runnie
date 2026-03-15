@@ -14,12 +14,13 @@ import * as schema from '@/common/db/schema';
         const isMigrating = configService.get<string>('DB_MIGRATING') === 'true';
         const isSeeding = configService.get<string>('DB_SEEDING') === 'true';
 
+        const connectionString = configService.getOrThrow('DATABASE_URL');
+        const isProduction = process.env.NODE_ENV === 'production';
+
         const pool = new Pool({
-          connectionString: configService.getOrThrow('DATABASE_URL'),
+          connectionString,
           max: isMigrating || isSeeding ? 1 : 10,
-          ssl: {
-            rejectUnauthorized: false,
-          },
+          ssl: isProduction ? { rejectUnauthorized: false } : undefined,
         });
 
         return drizzle(pool, {
