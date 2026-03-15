@@ -53,7 +53,11 @@ describe('CookieService', () => {
 
     it('운영 환경(production)에서 보안이 강화된 쿠키 옵션을 설정해야 한다', () => {
       // given
-      mockConfigService.get.mockReturnValue('production');
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'NODE_ENV') return 'production';
+        if (key === 'COOKIE_DOMAIN') return 'example.domain.com';
+        return null;
+      });
 
       // when
       const result = service.buildCookie('testKey', 'testValue');
