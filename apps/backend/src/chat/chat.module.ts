@@ -1,14 +1,28 @@
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ChatGateway } from '@/chat/chat.gateway';
+import { WsJwtGuard } from '@/chat/ws-jwt.guard';
 import { ChatService } from '@/chat/service';
 import { ChatRepository } from '@/chat/repository';
 import { ChatController } from '@/chat/controller';
 import { DbModule } from '@/common/db/db.module';
+import { MemberModule } from '@/member/member.module';
 
 @Module({
-  imports: [DbModule],
+  imports: [
+    DbModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+      }),
+    }),
+    MemberModule,
+  ],
   controllers: [ChatController],
-  providers: [ChatGateway, ChatService, ChatRepository],
+  providers: [ChatGateway, WsJwtGuard, ChatService, ChatRepository],
   exports: [ChatService],
 })
 export class ChatModule {}

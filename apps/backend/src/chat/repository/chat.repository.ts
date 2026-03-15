@@ -83,4 +83,29 @@ export class ChatRepository {
 
     return chatRoom || null;
   }
+
+  async saveMessage(chatRoomId: number, senderId: number, content: string) {
+    const [message] = await this.db
+      .insert(ChatMessage)
+      .values({ chatRoomId, senderId, content })
+      .returning();
+
+    return message;
+  }
+
+  async findMessagesByRoomId(chatRoomId: number, limit = 50) {
+    const messages = await this.db
+      .select({
+        id: ChatMessage.id,
+        content: ChatMessage.content,
+        senderId: ChatMessage.senderId,
+        createdAt: ChatMessage.createdAt,
+      })
+      .from(ChatMessage)
+      .where(eq(ChatMessage.chatRoomId, chatRoomId))
+      .orderBy(desc(ChatMessage.createdAt))
+      .limit(limit);
+
+    return messages.reverse();
+  }
 }

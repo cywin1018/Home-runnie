@@ -2,7 +2,11 @@
 
 import { useState } from 'react';
 
-const ChatInput = () => {
+interface ChatInputProps {
+  onSend: (message: string) => void;
+}
+
+const ChatInput = ({ onSend }: ChatInputProps) => {
   const [message, setMessage] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -12,8 +16,7 @@ const ChatInput = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim()) {
-      // TODO: 메시지 전송 로직 구현
-      console.log('메시지 전송:', message);
+      onSend(message.trim());
       setMessage('');
     }
   };

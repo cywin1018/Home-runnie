@@ -8,12 +8,7 @@ import { useChatRooms } from '@/stores/ChatRoomsContext';
 import { getMyChatRooms } from '@/apis/chat/chat';
 import { ChatRoomResponse } from '@homerunnie/shared';
 import { useState, useEffect } from 'react';
-
-interface Message {
-  id: number;
-  text: string;
-  sender: 'me' | 'other';
-}
+import { useSocket } from '@/hooks/chat/useSocket';
 
 interface RoomInfo {
   title: string;
@@ -24,7 +19,6 @@ interface RoomInfo {
 
 interface RoomData {
   info: RoomInfo;
-  messages: Message[];
 }
 
 const formatKoreanDate = (date: Date): string => {
@@ -46,7 +40,6 @@ const createRoomData = (room: ChatRoomResponse): RoomData => {
       matchDate: formatKoreanDate(new Date()),
       matchTeam: `게시글 ${room.postId} 모임`,
     },
-    messages: [{ id: 1, text: '채팅방이 생성되었습니다.', sender: 'other' }],
   };
 };
 
@@ -56,6 +49,7 @@ const ChatBox = ({ roomId }: { roomId: string }) => {
   const [loading, setLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const { messages, sendMessage, connected } = useSocket(roomId);
 
   // 채팅방 정보를 API에서 가져오기
   useEffect(() => {
@@ -84,7 +78,6 @@ const ChatBox = ({ roomId }: { roomId: string }) => {
               matchDate: '-',
               matchTeam: '-',
             },
-            messages: [],
           });
         }
       } catch (error) {
@@ -96,7 +89,6 @@ const ChatBox = ({ roomId }: { roomId: string }) => {
             matchDate: '-',
             matchTeam: '-',
           },
-          messages: [],
         });
       } finally {
         setLoading(false);
@@ -148,7 +140,10 @@ const ChatBox = ({ roomId }: { roomId: string }) => {
           />
 
           <div className="grow flex flex-col justify-end gap-4 overflow-y-auto mb-6">
-            {currentRoomData.messages.map((msg) => (
+            {!connected && (
+              <p className="text-center text-sm text-gray-400">서버에 연결 중...</p>
+            )}
+            {messages.map((msg) => (
               <div
                 key={msg.id}
                 className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}
@@ -168,7 +163,7 @@ const ChatBox = ({ roomId }: { roomId: string }) => {
           </div>
 
           <div className="shrink-0">
-            <ChatInput />
+            <ChatInput onSend={sendMessage} />
           </div>
         </section>
       </div>
