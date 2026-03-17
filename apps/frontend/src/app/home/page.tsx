@@ -3,7 +3,7 @@ import MateListBanner from './components/MateListBanner';
 
 export default function Page() {
   return (
-    <div className="w-full flex flex-col gap-[54px]">
+    <div className="w-full flex flex-col">
       <MainBanner />
       <MateListBanner />
     </div>
