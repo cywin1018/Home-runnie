@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body className="font-sans">
         <Providers>
           <div className="min-h-screen flex flex-col">
             <Header />

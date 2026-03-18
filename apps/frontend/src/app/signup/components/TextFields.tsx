@@ -133,7 +133,7 @@ export default function TextFields() {
               {field.type === 'text' ? (
                 <TextField
                   {...register(field.name)}
-                  className="h-[60px] px-[22px] py-4 leading-[28px] !text-b02-m placeholder:font-normal font-medium"
+                  className="h-[60px] px-[22px] py-4 leading-[28px] text-b02-m! placeholder:font-normal font-medium placeholder:text-gray-200"
                   placeholder={field.placeholder}
                   errorMessage={errors[field.name]?.message}
                 />
@@ -143,7 +143,7 @@ export default function TextFields() {
                   control={control}
                   render={({ field: { onChange, value } }) => (
                     <Dropdown
-                      className="!h-[60px] px-[22px] py-4 !text-b02-m"
+                      className="h-[60px]! px-[22px] py-4 text-b02-m hover:border-gray-200"
                       placeholder={field.placeholder}
                       items={field.items || []}
                       value={value || undefined}
@@ -159,7 +159,7 @@ export default function TextFields() {
 
         <Button
           type="submit"
-          className="w-full h-16 text-b01-sb text-white"
+          className="w-full h-16 text-b01-sb text-white rounded-[16px]! cursor-pointer"
           size="lg"
           disabled={!isValid}
         >
