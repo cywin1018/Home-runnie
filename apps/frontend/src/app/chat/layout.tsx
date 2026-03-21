@@ -58,7 +58,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
   }, []);
 
   return (
-    <div className="flex flex-row justify-center h-[calc(100vh-84px)]">
+    <div className="flex flex-row justify-center h-[calc(100vh-84px)] -mx-[120px] w-[calc(100%+240px)] max-w-none">
       <aside className="flex flex-col min-w-[400px] border-r border-gray-200 bg-white h-full">
         <div className="shrink-0">
           <h1 className="text-t00 pb-[30px] p-6">채팅</h1>
