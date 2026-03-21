@@ -37,7 +37,7 @@ const formatKoreanDate = (date: Date): string => {
 const createRoomData = (room: ChatRoomResponse): RoomData => {
   return {
     info: {
-      title: `게시글 ${room.postId} 채팅방`,
+      title: room.postTitle,
       matchDate: formatKoreanDate(new Date()),
       matchTeam: `게시글 ${room.postId} 모임`,
       role: room.role,
@@ -103,7 +103,6 @@ const ChatBox = ({ roomId }: { roomId: string }) => {
         setRoomData({
           info: {
             title: '알 수 없는 방',
-            participants: '-',
             matchDate: '-',
             matchTeam: '-',
             role: ChatRoomMemberRole.MEMBER,

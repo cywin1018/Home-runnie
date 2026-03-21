@@ -6,6 +6,7 @@ import { ChatRoom, ChatRoomMember, ChatMessage, ChatJoinRequest } from '@/chat/d
 import { ChatRoomMemberRole, ChatJoinRequestStatus } from '@homerunnie/shared';
 import { Member } from '@/member/domain/member.entity';
 import { Profile } from '@/member/domain/profile.entity';
+import { Post } from '@/post/domain';
 import * as schema from '@/common/db/schema';
 
 type ChatRoomType = typeof ChatRoom.$inferSelect;
@@ -49,6 +50,7 @@ export class ChatRepository {
       .select({
         id: ChatRoom.id,
         postId: ChatRoom.postId,
+        postTitle: Post.title,
         createdAt: ChatRoom.createdAt,
         updatedAt: ChatRoom.updatedAt,
         deleted: ChatRoom.deleted,
@@ -56,6 +58,7 @@ export class ChatRepository {
       })
       .from(ChatRoom)
       .innerJoin(ChatRoomMember, eq(ChatRoom.id, ChatRoomMember.chatRoomId))
+      .leftJoin(Post, eq(ChatRoom.postId, Post.id))
       .where(and(eq(ChatRoomMember.memberId, memberId), eq(ChatRoom.deleted, false)))
       .orderBy(desc(ChatRoom.updatedAt))
       .limit(limit)

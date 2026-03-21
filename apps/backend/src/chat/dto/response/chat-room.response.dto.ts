@@ -17,6 +17,13 @@ export class ChatRoomResponseDto implements ChatRoomResponse {
   postId: number;
 
   @ApiProperty({
+    description: '게시글 제목',
+    type: 'string',
+    example: '한화 vs 기아 직관 같이 가실 분',
+  })
+  postTitle: string;
+
+  @ApiProperty({
     description: '현재 사용자의 역할',
     enum: ChatRoomMemberRole,
     example: ChatRoomMemberRole.HOST,
@@ -44,6 +51,7 @@ export class ChatRoomResponseDto implements ChatRoomResponse {
   static from(data: {
     id: number;
     postId: number;
+    postTitle?: string | null;
     createdAt: Date;
     updatedAt: Date;
     role: string;
@@ -51,6 +59,7 @@ export class ChatRoomResponseDto implements ChatRoomResponse {
     return new ChatRoomResponseDto({
       id: data.id,
       postId: data.postId,
+      postTitle: data.postTitle ?? `채팅방 ${data.id}`,
       role: data.role as ChatRoomMemberRole,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,

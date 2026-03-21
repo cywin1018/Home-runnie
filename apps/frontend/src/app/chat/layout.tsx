@@ -39,7 +39,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
         // API 응답 데이터를 ChatListItem 형식으로 변환
         const updatedRooms: ChatListItem[] = response.data.map((room, index) => ({
           id: String(room.id),
-          title: `게시글 ${room.postId} 채팅방`,
+          title: room.postTitle,
           participants: [`참여자${index + 1}`, `참여자${index + 2}`],
           lastMessage: '새로운 메시지가 없습니다.',
           unreadCount: 0,

@@ -38,7 +38,14 @@ export class GetChatRoomsResponseDto implements GetChatRoomsResponse {
   }
 
   static from(
-    chatRooms: { id: number; postId: number; createdAt: Date; updatedAt: Date; role: string }[],
+    chatRooms: {
+      id: number;
+      postId: number;
+      postTitle?: string | null;
+      createdAt: Date;
+      updatedAt: Date;
+      role: string;
+    }[],
     total: number,
     page: number,
     limit: number,
