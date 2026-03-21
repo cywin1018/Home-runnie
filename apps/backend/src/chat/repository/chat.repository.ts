@@ -170,7 +170,13 @@ export class ChatRepository {
     const [updated] = await this.db
       .update(ChatRoomMember)
       .set({ deleted: true })
-      .where(and(eq(ChatRoomMember.chatRoomId, chatRoomId), eq(ChatRoomMember.memberId, memberId)))
+      .where(
+        and(
+          eq(ChatRoomMember.chatRoomId, chatRoomId),
+          eq(ChatRoomMember.memberId, memberId),
+          eq(ChatRoomMember.deleted, false),
+        ),
+      )
       .returning();
 
     return updated || null;

@@ -21,8 +21,8 @@ export class CommentService {
     }));
   }
 
-  async deleteComment(memberId: number, commentId: number) {
-    const comment = await this.commentRepository.softDeleteComment(commentId);
+  async deleteComment(memberId: number, postId: number, commentId: number) {
+    const comment = await this.commentRepository.findCommentById(commentId, postId);
     if (!comment) {
       throw new NotFoundException('해당 댓글을 찾을 수 없습니다.');
     }
@@ -30,6 +30,7 @@ export class CommentService {
       throw new ForbiddenException('작성자만 삭제할 수 있습니다.');
     }
 
+    await this.commentRepository.softDeleteComment(commentId, postId);
     return { id: comment.id };
   }
 
