@@ -200,7 +200,12 @@ export class ChatRepository {
         memberId,
         status: ChatJoinRequestStatus.PENDING,
       })
-      .returning();
+      .returning({
+        id: ChatJoinRequest.id,
+        status: ChatJoinRequest.status,
+        chatRoomId: ChatJoinRequest.chatRoomId,
+        memberId: ChatJoinRequest.memberId,
+      });
 
     return request;
   }
@@ -224,7 +229,6 @@ export class ChatRepository {
         and(
           eq(ChatJoinRequest.chatRoomId, chatRoomId),
           eq(ChatJoinRequest.status, ChatJoinRequestStatus.PENDING),
-          eq(ChatJoinRequest.deleted, false),
         ),
       )
       .orderBy(desc(ChatJoinRequest.createdAt));
@@ -234,7 +238,12 @@ export class ChatRepository {
 
   async findJoinRequestById(requestId: number) {
     const [request] = await this.db
-      .select()
+      .select({
+        id: ChatJoinRequest.id,
+        status: ChatJoinRequest.status,
+        chatRoomId: ChatJoinRequest.chatRoomId,
+        memberId: ChatJoinRequest.memberId,
+      })
       .from(ChatJoinRequest)
       .where(eq(ChatJoinRequest.id, requestId));
 
@@ -246,21 +255,28 @@ export class ChatRepository {
       .update(ChatJoinRequest)
       .set({ status })
       .where(eq(ChatJoinRequest.id, requestId))
-      .returning();
+      .returning({
+        id: ChatJoinRequest.id,
+        status: ChatJoinRequest.status,
+      });
 
     return updated || null;
   }
 
   async findExistingJoinRequest(chatRoomId: number, memberId: number) {
     const [request] = await this.db
-      .select()
+      .select({
+        id: ChatJoinRequest.id,
+        status: ChatJoinRequest.status,
+        chatRoomId: ChatJoinRequest.chatRoomId,
+        memberId: ChatJoinRequest.memberId,
+      })
       .from(ChatJoinRequest)
       .where(
         and(
           eq(ChatJoinRequest.chatRoomId, chatRoomId),
           eq(ChatJoinRequest.memberId, memberId),
           eq(ChatJoinRequest.status, ChatJoinRequestStatus.PENDING),
-          eq(ChatJoinRequest.deleted, false),
         ),
       );
 
