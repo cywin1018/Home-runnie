@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import ChatList from './components/ChatList';
-import { getMyChatRooms } from '@/apis/chat/chat';
+import { getMyChatRooms, getChatRoomMembers } from '@/apis/chat/chat';
 import { ChatRoomResponse, ChatRoomMemberRole } from '@homerunnie/shared';
 import { ChatRoomsContext } from '@/stores/ChatRoomsContext';
 
@@ -36,15 +36,26 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
         });
         setChatRoomsMap(roomsMap);
 
+        // 각 채팅방의 멤버 목록을 병렬로 조회
+        const memberResults = await Promise.allSettled(
+          response.data.map((room) => getChatRoomMembers(room.id)),
+        );
+
         // API 응답 데이터를 ChatListItem 형식으로 변환
-        const updatedRooms: ChatListItem[] = response.data.map((room, index) => ({
-          id: String(room.id),
-          title: room.postTitle,
-          participants: [`참여자${index + 1}`, `참여자${index + 2}`],
-          lastMessage: '새로운 메시지가 없습니다.',
-          unreadCount: 0,
-          role: room.role,
-        }));
+        const updatedRooms: ChatListItem[] = response.data.map((room, index) => {
+          const memberResult = memberResults[index];
+          const members =
+            memberResult.status === 'fulfilled' ? memberResult.value.map((m) => m.nickname) : [];
+
+          return {
+            id: String(room.id),
+            title: room.postTitle,
+            participants: members,
+            lastMessage: '새로운 메시지가 없습니다.',
+            unreadCount: 0,
+            role: room.role,
+          };
+        });
 
         setDummyRooms(updatedRooms);
       } catch (error) {

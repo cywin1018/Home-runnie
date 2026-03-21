@@ -3,6 +3,7 @@ import { DATABASE_CONNECTION } from '@/common';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Report } from '@/report/domain';
 import { eq } from 'drizzle-orm';
+import { ReportType } from '@/common/enums';
 
 @Injectable()
 export class ReportRepository {
@@ -18,5 +19,19 @@ export class ReportRepository {
     ]);
 
     return { reportingRecords, reportedRecords };
+  }
+
+  async createReport(
+    reporterId: number,
+    reportedId: number,
+    reportType: ReportType,
+    content?: string,
+  ) {
+    const [report] = await this.db
+      .insert(Report)
+      .values({ reporterId, reportedId, reportType, content })
+      .returning();
+
+    return report;
   }
 }

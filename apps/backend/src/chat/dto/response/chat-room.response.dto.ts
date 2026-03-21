@@ -31,6 +31,30 @@ export class ChatRoomResponseDto implements ChatRoomResponse {
   role: ChatRoomMemberRole;
 
   @ApiProperty({
+    description: '홈팀',
+    type: 'string',
+    example: 'HANWHA',
+    nullable: true,
+  })
+  teamHome: string | null;
+
+  @ApiProperty({
+    description: '원정팀',
+    type: 'string',
+    example: 'KIA',
+    nullable: true,
+  })
+  teamAway: string | null;
+
+  @ApiProperty({
+    description: '경기 날짜',
+    type: 'string',
+    example: '2024-05-01T18:30:00',
+    nullable: true,
+  })
+  gameDate: string | null;
+
+  @ApiProperty({
     description: '생성 일시',
     type: 'string',
     example: '2024-01-17T12:00:00Z',
@@ -55,12 +79,18 @@ export class ChatRoomResponseDto implements ChatRoomResponse {
     createdAt: Date;
     updatedAt: Date;
     role: string;
+    teamHome?: string | null;
+    teamAway?: string | null;
+    gameDate?: string | null;
   }): ChatRoomResponseDto {
     return new ChatRoomResponseDto({
       id: data.id,
       postId: data.postId,
       postTitle: data.postTitle ?? `채팅방 ${data.id}`,
       role: data.role as ChatRoomMemberRole,
+      teamHome: data.teamHome ?? null,
+      teamAway: data.teamAway ?? null,
+      gameDate: data.gameDate ?? null,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
     });

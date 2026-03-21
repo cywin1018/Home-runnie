@@ -2,6 +2,7 @@
 
 import { useRecruitmentPostsQuery } from '@/hooks/post/usePostQuery';
 import MateItem from '@/app/home/components/MateItem';
+import { TeamDescription, Team } from '@homerunnie/shared';
 
 const formatGameDate = (gameDate: string) => {
   const date = new Date(gameDate);
@@ -40,7 +41,7 @@ export default function RecruitmentListPage() {
             <MateItem
               key={item.id}
               id={item.id}
-              match={`${item.teamHome} vs ${item.teamAway}`}
+              match={`${TeamDescription[item.teamHome as Team] ?? item.teamHome} vs ${TeamDescription[item.teamAway as Team] ?? item.teamAway}`}
               title={item.title}
               date={formatGameDate(item.gameDate)}
               isLast={index === posts.length - 1}

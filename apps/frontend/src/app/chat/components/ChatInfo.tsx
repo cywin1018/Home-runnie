@@ -70,7 +70,7 @@ const ChatInfo = ({
               <button
                 type="button"
                 onClick={handleMailClick}
-                className="relative p-1 hover:bg-gray-100 rounded transition-colors"
+                className="relative p-1 hover:bg-gray-100 rounded transition-colors cursor-pointer"
                 aria-label="참여 요청"
               >
                 <Mail className="w-6 h-6 text-gray-600" />
@@ -86,7 +86,7 @@ const ChatInfo = ({
           <button
             type="button"
             onClick={onToggleSidebar}
-            className="p-1 hover:bg-gray-100 rounded transition-colors"
+            className="p-1 hover:bg-gray-100 rounded transition-colors cursor-pointer"
             aria-label="사이드바"
           >
             <Menu className="w-6 h-6 text-gray-600" />
