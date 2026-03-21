@@ -22,7 +22,7 @@ import { WsJwtGuard, WsSocketUser, WsUser, extractTokenFromSocket } from '@/chat
 @WebSocketGateway({
   namespace: 'chat',
   cors: {
-    origin: process.env.LOCAL_FRONT ?? 'http://localhost:3000',
+    origin: ['http://localhost:3000', 'https://www.homerunnie.app'],
     credentials: true,
   },
 })

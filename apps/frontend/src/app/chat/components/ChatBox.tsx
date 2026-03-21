@@ -7,10 +7,11 @@ import ChatInput from './ChatInput';
 import ChatReport from './ChatReport';
 import ChatInfoSidebar from './ChatInfoSidebar';
 import { useChatRooms } from '@/stores/ChatRoomsContext';
-import { getMyChatRooms } from '@/apis/chat/chat';
-import { ChatRoomResponse, ChatRoomMemberRole } from '@homerunnie/shared';
+import { getMyChatRooms, getChatRoomMembers } from '@/apis/chat/chat';
+import { ChatRoomResponse, ChatRoomMemberRole, TeamDescription, Team } from '@homerunnie/shared';
 import { useState } from 'react';
 import { useSocket } from '@/hooks/chat/useSocket';
+import { ReportParticipant } from '@/shared/ui/modal/ReportModal';
 
 interface RoomInfo {
   title: string;
@@ -34,12 +35,20 @@ const formatKoreanDate = (date: Date): string => {
     .replace(/\s/g, '');
 };
 
+const formatTeamName = (team: string | null): string => {
+  if (!team) return '-';
+  return TeamDescription[team as Team] ?? team;
+};
+
 const createRoomData = (room: ChatRoomResponse): RoomData => {
   return {
     info: {
       title: room.postTitle,
-      matchDate: formatKoreanDate(new Date()),
-      matchTeam: `게시글 ${room.postId} 모임`,
+      matchDate: room.gameDate ? formatKoreanDate(new Date(room.gameDate)) : '-',
+      matchTeam:
+        room.teamHome && room.teamAway
+          ? `${formatTeamName(room.teamHome)} vs ${formatTeamName(room.teamAway)}`
+          : '-',
       role: room.role,
     },
   };
@@ -52,6 +61,7 @@ const ChatBox = ({ roomId }: { roomId: string }) => {
   const [loading, setLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [reportParticipants, setReportParticipants] = useState<ReportParticipant[]>([]);
   const {
     messages,
     sendMessage,
@@ -68,6 +78,19 @@ const ChatBox = ({ roomId }: { roomId: string }) => {
       router.push('/chat');
     }
   }, [kickedFromRoom, roomDeleted, router]);
+
+  // 채팅방 멤버 목록 조회
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        const members = await getChatRoomMembers(Number(roomId));
+        setReportParticipants(members.map((m) => ({ memberId: m.memberId, nickname: m.nickname })));
+      } catch (error) {
+        console.error('멤버 목록 조회 실패:', error);
+      }
+    };
+    fetchMembers();
+  }, [roomId]);
 
   // 채팅방 정보를 API에서 가져오기
   useEffect(() => {
@@ -158,6 +181,7 @@ const ChatBox = ({ roomId }: { roomId: string }) => {
             isModalOpen={isReportModalOpen}
             onOpenModal={() => setIsReportModalOpen(true)}
             onCloseModal={() => setIsReportModalOpen(false)}
+            participants={reportParticipants}
           />
 
           <div className="grow flex flex-col justify-end gap-4 overflow-y-auto mb-6">

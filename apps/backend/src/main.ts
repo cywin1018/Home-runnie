@@ -10,11 +10,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
-  const corsOriginString = configService.get<string>('CORS_ORIGINS') || 'http://localhost:3000';
-  const corsOrigins = corsOriginString.split(',');
-
   app.enableCors({
-    origin: corsOrigins,
+    origin: ['http://localhost:3000', 'https://www.homerunnie.app'],
     credentials: true,
   });
 

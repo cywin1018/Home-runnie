@@ -102,7 +102,7 @@ const JoinRequestDropdown = ({ roomId }: JoinRequestDropdownProps) => {
                       e.stopPropagation();
                       handleAccept(request.id);
                     }}
-                    className="text-b02-r text-green-600 hover:text-green-700 transition-colors"
+                    className="text-b02-r text-green-600 hover:text-green-700 transition-colors cursor-pointer"
                   >
                     수락
                   </button>
@@ -111,7 +111,7 @@ const JoinRequestDropdown = ({ roomId }: JoinRequestDropdownProps) => {
                       e.stopPropagation();
                       handleReject(request.id);
                     }}
-                    className="text-b02-r text-red-500 hover:text-red-600 transition-colors"
+                    className="text-b02-r text-red-500 hover:text-red-600 transition-colors cursor-pointer"
                   >
                     거절
                   </button>
