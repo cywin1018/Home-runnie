@@ -128,8 +128,10 @@ export class ChatRepository {
         content: ChatMessage.content,
         senderId: ChatMessage.senderId,
         createdAt: ChatMessage.createdAt,
+        nickname: Profile.nickname,
       })
       .from(ChatMessage)
+      .innerJoin(Profile, eq(ChatMessage.senderId, Profile.memberId))
       .where(eq(ChatMessage.chatRoomId, chatRoomId))
       .orderBy(desc(ChatMessage.createdAt))
       .limit(limit);
@@ -137,8 +139,9 @@ export class ChatRepository {
     return messages.reverse();
   }
 
-  async findChatRoomMember(chatRoomId: number, memberId: number) {
-    const [member] = await this.db
+  async findChatRoomMember(chatRoomId: number, memberId: number, tx?: DbTransaction) {
+    const executor = tx || this.db;
+    const [member] = await executor
       .select()
       .from(ChatRoomMember)
       .where(
@@ -250,11 +253,21 @@ export class ChatRepository {
     return request || null;
   }
 
-  async updateJoinRequestStatus(requestId: number, status: ChatJoinRequestStatus) {
-    const [updated] = await this.db
+  async updateJoinRequestStatus(
+    requestId: number,
+    status: ChatJoinRequestStatus,
+    tx?: DbTransaction,
+  ) {
+    const executor = tx || this.db;
+    const [updated] = await executor
       .update(ChatJoinRequest)
       .set({ status })
-      .where(eq(ChatJoinRequest.id, requestId))
+      .where(
+        and(
+          eq(ChatJoinRequest.id, requestId),
+          eq(ChatJoinRequest.status, ChatJoinRequestStatus.PENDING),
+        ),
+      )
       .returning({
         id: ChatJoinRequest.id,
         status: ChatJoinRequest.status,

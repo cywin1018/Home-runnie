@@ -129,12 +129,30 @@ export class ChatService {
 
     await this.verifyHost(request.chatRoomId, hostId);
 
-    await this.db.transaction(async () => {
-      await this.chatRepository.updateJoinRequestStatus(requestId, ChatJoinRequestStatus.ACCEPTED);
+    await this.db.transaction(async (tx) => {
+      const updated = await this.chatRepository.updateJoinRequestStatus(
+        requestId,
+        ChatJoinRequestStatus.ACCEPTED,
+        tx,
+      );
+      if (!updated) {
+        throw new BadRequestException('이미 처리된 요청입니다.');
+      }
+
+      const existingMember = await this.chatRepository.findChatRoomMember(
+        request.chatRoomId,
+        request.memberId,
+        tx,
+      );
+      if (existingMember) {
+        throw new ConflictException('이미 채팅방에 참여 중인 멤버입니다.');
+      }
+
       await this.chatRepository.createChatRoomMember(
         request.chatRoomId,
         request.memberId,
         ChatRoomMemberRole.MEMBER,
+        tx,
       );
     });
 
@@ -157,7 +175,18 @@ export class ChatService {
 
     await this.verifyHost(request.chatRoomId, hostId);
 
-    await this.chatRepository.updateJoinRequestStatus(requestId, ChatJoinRequestStatus.REJECTED);
+    const updated = await this.chatRepository.updateJoinRequestStatus(
+      requestId,
+      ChatJoinRequestStatus.REJECTED,
+    );
+    if (!updated) {
+      throw new BadRequestException('이미 처리된 요청입니다.');
+    }
+
+    this.chatGateway.emitJoinRequestRejected(String(request.chatRoomId), {
+      memberId: request.memberId,
+    });
+
     return { chatRoomId: request.chatRoomId, memberId: request.memberId };
   }
 

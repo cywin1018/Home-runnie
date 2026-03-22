@@ -33,13 +33,21 @@ export function useSocket(roomId: string) {
 
     socket.on(
       'message_history',
-      (history: { id: number; message: string; isOwn: boolean; createdAt: string }[]) => {
+      (
+        history: {
+          id: number;
+          message: string;
+          isOwn: boolean;
+          nickname: string;
+          createdAt: string;
+        }[],
+      ) => {
         setMessages(
           history.map((msg) => ({
             id: msg.id,
             text: msg.message,
             sender: msg.isOwn ? 'me' : ('other' as const),
-            nickname: '',
+            nickname: msg.isOwn ? '' : msg.nickname,
           })),
         );
       },

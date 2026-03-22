@@ -109,6 +109,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         id: msg.id,
         message: msg.content,
         isOwn: msg.senderId === user.memberId,
+        nickname: msg.nickname,
         createdAt: msg.createdAt,
       })),
     );
@@ -151,6 +152,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   emitMemberJoined(roomId: string, data: unknown) {
     this.server.to(roomId).emit('member_joined', data);
+  }
+
+  emitJoinRequestRejected(roomId: string, data: unknown) {
+    this.server.to(roomId).emit('join_request_rejected', data);
   }
 
   emitMemberKicked(roomId: string, data: unknown) {
