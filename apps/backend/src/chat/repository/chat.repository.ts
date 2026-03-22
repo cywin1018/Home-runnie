@@ -139,8 +139,9 @@ export class ChatRepository {
     return messages.reverse();
   }
 
-  async findChatRoomMember(chatRoomId: number, memberId: number) {
-    const [member] = await this.db
+  async findChatRoomMember(chatRoomId: number, memberId: number, tx?: DbTransaction) {
+    const executor = tx || this.db;
+    const [member] = await executor
       .select()
       .from(ChatRoomMember)
       .where(
@@ -261,7 +262,12 @@ export class ChatRepository {
     const [updated] = await executor
       .update(ChatJoinRequest)
       .set({ status })
-      .where(eq(ChatJoinRequest.id, requestId))
+      .where(
+        and(
+          eq(ChatJoinRequest.id, requestId),
+          eq(ChatJoinRequest.status, ChatJoinRequestStatus.PENDING),
+        ),
+      )
       .returning({
         id: ChatJoinRequest.id,
         status: ChatJoinRequest.status,
