@@ -1,5 +1,6 @@
 import { CreateRecruitmentPostRequest, CreateRecruitmentPostResponse } from '@homerunnie/shared';
 import { apiClient } from '@/lib/fetchClient';
+import { toPickedDisplayValues } from '@/shared/constants/picked-tags';
 
 export interface RecruitmentPostItemResponse {
   id: number;
@@ -113,7 +114,7 @@ export const getRecruitmentPostDetail = async (
     favTeam: (raw.supportTeam ?? undefined) as CreateRecruitmentPostRequest['favTeam'],
     gender: raw.gender,
     prefGender: prefGenderMap[raw.preferGender] ?? 'ANY',
-    picked: raw.picked,
+    picked: toPickedDisplayValues(raw.picked),
     note: raw.message ?? undefined,
   };
 };
