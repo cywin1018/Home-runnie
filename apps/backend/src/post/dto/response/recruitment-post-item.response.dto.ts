@@ -16,6 +16,12 @@ export class RecruitmentPostItemResponseDto {
   @ApiProperty({ description: '원정 팀', example: 'DOOSAN' })
   teamAway: string;
 
+  @ApiProperty({ description: '모집 상태', example: 'ACTIVE' })
+  postStatus: string;
+
+  @ApiProperty({ description: '작성자 닉네임', example: '야구좋아', nullable: true })
+  authorNickname: string | null;
+
   @ApiProperty({ description: '생성 일시', example: '2026-03-01T12:00:00.000Z' })
   createdAt: string;
 

@@ -1,4 +1,5 @@
 export * from './request/create-recruitment-post.request.dto';
+export * from './request/get-recruitment-posts.query.dto';
 export * from './request/update-recruitment-post-status.request.dto';
 export * from './response/create-recruitment-post.response.dto';
 export * from './response/recruitment-post-item.response.dto';

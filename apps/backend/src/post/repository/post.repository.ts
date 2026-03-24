@@ -12,6 +12,22 @@ import { Profile } from '@/member/domain/profile.entity';
 import { DATABASE_CONNECTION } from '@/common';
 import { and, count, desc, eq, sql } from 'drizzle-orm';
 
+type RecruitmentPostSearchFilters = {
+  keyword?: string;
+  title?: string;
+  gameDate?: string;
+  stadium?: Stadium;
+  teamA?: Team;
+  teamB?: Team;
+  headcount?: number;
+  ticketingType?: TicketingType;
+  favTeam?: Team;
+  gender?: 'F' | 'M';
+  preferGender?: PreferGender;
+  picked?: string[];
+  note?: string;
+};
+
 @Injectable()
 export class PostRepository {
   constructor(
@@ -73,8 +89,57 @@ export class PostRepository {
     };
   }
 
-  async findRecruitmentPosts(page: number, limit: number) {
+  async findRecruitmentPosts(page: number, limit: number, filters?: RecruitmentPostSearchFilters) {
     const offset = (page - 1) * limit;
+    const conditions = [eq(Post.post_type, PostType.RECRUITMENT), eq(Post.deleted, false)];
+    const trimmedKeyword = filters?.keyword?.trim();
+    const trimmedTitle = filters?.title?.trim();
+    const trimmedNote = filters?.note?.trim();
+
+    if (trimmedKeyword) {
+      conditions.push(sql`LOWER(${Post.title}) LIKE ${`%${trimmedKeyword.toLowerCase()}%`}`);
+    }
+    if (trimmedTitle) {
+      conditions.push(sql`LOWER(${Post.title}) LIKE ${`%${trimmedTitle.toLowerCase()}%`}`);
+    }
+    if (filters?.gameDate) {
+      conditions.push(sql`DATE(${RecruitmentDetail.gameDate}) = DATE(${filters.gameDate})`);
+    }
+    if (filters?.stadium) {
+      conditions.push(eq(RecruitmentDetail.stadium, filters.stadium));
+    }
+    if (filters?.teamA) {
+      conditions.push(eq(RecruitmentDetail.teamHome, filters.teamA));
+    }
+    if (filters?.teamB) {
+      conditions.push(eq(RecruitmentDetail.teamAway, filters.teamB));
+    }
+    if (typeof filters?.headcount === 'number' && Number.isFinite(filters.headcount)) {
+      conditions.push(eq(RecruitmentDetail.recruitmentLimit, filters.headcount));
+    }
+    if (filters?.ticketingType) {
+      conditions.push(eq(RecruitmentDetail.ticketingType, filters.ticketingType));
+    }
+    if (filters?.favTeam) {
+      conditions.push(eq(RecruitmentDetail.supportTeam, filters.favTeam));
+    }
+    if (filters?.gender) {
+      conditions.push(eq(Member.gender, filters.gender));
+    }
+    if (filters?.preferGender) {
+      conditions.push(eq(RecruitmentDetail.preferGender, filters.preferGender));
+    }
+    if (trimmedNote) {
+      conditions.push(
+        sql`LOWER(COALESCE(${RecruitmentDetail.message}, '')) LIKE ${`%${trimmedNote.toLowerCase()}%`}`,
+      );
+    }
+    if (filters?.picked?.length) {
+      const pickedConditions = filters.picked.map(
+        (value) => sql`${value} = ANY(${RecruitmentDetail.picked})`,
+      );
+      conditions.push(sql`(${sql.join(pickedConditions, sql` OR `)})`);
+    }
 
     const data = await this.db
       .select({
@@ -83,11 +148,15 @@ export class PostRepository {
         gameDate: sql<string>`TO_CHAR(${RecruitmentDetail.gameDate}, 'YYYY-MM-DD')`,
         teamHome: RecruitmentDetail.teamHome,
         teamAway: RecruitmentDetail.teamAway,
+        postStatus: Post.postStatus,
+        authorNickname: Profile.nickname,
         createdAt: Post.createdAt,
       })
       .from(Post)
       .innerJoin(RecruitmentDetail, eq(Post.id, RecruitmentDetail.postId))
-      .where(and(eq(Post.post_type, PostType.RECRUITMENT), eq(Post.deleted, false)))
+      .leftJoin(Member, eq(Member.id, Post.authorId))
+      .leftJoin(Profile, eq(Profile.memberId, Post.authorId))
+      .where(and(...conditions))
       .orderBy(desc(Post.createdAt))
       .limit(limit)
       .offset(offset);
@@ -95,11 +164,63 @@ export class PostRepository {
     return data;
   }
 
-  async countRecruitmentPosts(): Promise<number> {
+  async countRecruitmentPosts(filters?: RecruitmentPostSearchFilters): Promise<number> {
+    const conditions = [eq(Post.post_type, PostType.RECRUITMENT), eq(Post.deleted, false)];
+    const trimmedKeyword = filters?.keyword?.trim();
+    const trimmedTitle = filters?.title?.trim();
+    const trimmedNote = filters?.note?.trim();
+
+    if (trimmedKeyword) {
+      conditions.push(sql`LOWER(${Post.title}) LIKE ${`%${trimmedKeyword.toLowerCase()}%`}`);
+    }
+    if (trimmedTitle) {
+      conditions.push(sql`LOWER(${Post.title}) LIKE ${`%${trimmedTitle.toLowerCase()}%`}`);
+    }
+    if (filters?.gameDate) {
+      conditions.push(sql`DATE(${RecruitmentDetail.gameDate}) = DATE(${filters.gameDate})`);
+    }
+    if (filters?.stadium) {
+      conditions.push(eq(RecruitmentDetail.stadium, filters.stadium));
+    }
+    if (filters?.teamA) {
+      conditions.push(eq(RecruitmentDetail.teamHome, filters.teamA));
+    }
+    if (filters?.teamB) {
+      conditions.push(eq(RecruitmentDetail.teamAway, filters.teamB));
+    }
+    if (typeof filters?.headcount === 'number' && Number.isFinite(filters.headcount)) {
+      conditions.push(eq(RecruitmentDetail.recruitmentLimit, filters.headcount));
+    }
+    if (filters?.ticketingType) {
+      conditions.push(eq(RecruitmentDetail.ticketingType, filters.ticketingType));
+    }
+    if (filters?.favTeam) {
+      conditions.push(eq(RecruitmentDetail.supportTeam, filters.favTeam));
+    }
+    if (filters?.gender) {
+      conditions.push(eq(Member.gender, filters.gender));
+    }
+    if (filters?.preferGender) {
+      conditions.push(eq(RecruitmentDetail.preferGender, filters.preferGender));
+    }
+    if (trimmedNote) {
+      conditions.push(
+        sql`LOWER(COALESCE(${RecruitmentDetail.message}, '')) LIKE ${`%${trimmedNote.toLowerCase()}%`}`,
+      );
+    }
+    if (filters?.picked?.length) {
+      const pickedConditions = filters.picked.map(
+        (value) => sql`${value} = ANY(${RecruitmentDetail.picked})`,
+      );
+      conditions.push(sql`(${sql.join(pickedConditions, sql` OR `)})`);
+    }
+
     const result = await this.db
       .select({ count: count() })
       .from(Post)
-      .where(and(eq(Post.post_type, PostType.RECRUITMENT), eq(Post.deleted, false)));
+      .innerJoin(RecruitmentDetail, eq(Post.id, RecruitmentDetail.postId))
+      .leftJoin(Member, eq(Member.id, Post.authorId))
+      .where(and(...conditions));
 
     return result[0]?.count || 0;
   }

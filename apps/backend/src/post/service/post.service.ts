@@ -3,6 +3,7 @@ import { PostRepository } from '@/post/repository';
 import {
   CreateRecruitmentPostRequestDto,
   CreateRecruitmentPostResponseDto,
+  GetRecruitmentPostsQueryDto,
   GetRecruitmentPostDetailResponseDto,
   GetRecruitmentPostsResponseDto,
   RecruitmentPostItemResponseDto,
@@ -74,12 +75,56 @@ export class PostService {
   }
 
   async getRecruitmentPosts(
-    page: number = 1,
-    limit: number = 10,
+    query: GetRecruitmentPostsQueryDto,
   ): Promise<GetRecruitmentPostsResponseDto> {
+    const page = query.page ?? 1;
+    const limit = query.pageSize ?? 10;
+    const ticketingType =
+      query.ticketStatus === 'have'
+        ? TicketingType.SEPARATE
+        : query.ticketStatus === 'need'
+          ? TicketingType.TOGETHER
+          : undefined;
+    const preferGender =
+      query.prefGender === 'F'
+        ? PreferGender.FEMALE
+        : query.prefGender === 'M'
+          ? PreferGender.MALE
+          : query.prefGender === 'ANY'
+            ? PreferGender.ANY
+            : undefined;
+
     const [posts, total] = await Promise.all([
-      this.postRepository.findRecruitmentPosts(page, limit),
-      this.postRepository.countRecruitmentPosts(),
+      this.postRepository.findRecruitmentPosts(page, limit, {
+        keyword: query.keyword,
+        title: query.title,
+        gameDate: query.gameDate,
+        stadium: query.stadium,
+        teamA: query.teamA,
+        teamB: query.teamB,
+        headcount: query.headcount ? Number.parseInt(query.headcount, 10) : undefined,
+        ticketingType,
+        favTeam: query.favTeam,
+        gender: query.gender,
+        preferGender,
+        picked: query.picked,
+        note: query.note,
+      }),
+      this.postRepository.countRecruitmentPosts({
+        keyword: query.keyword,
+        title: query.title,
+        gameDate: query.gameDate,
+        stadium: query.stadium,
+        teamA: query.teamA,
+        teamB: query.teamB,
+        headcount: query.headcount ? Number.parseInt(query.headcount, 10) : undefined,
+        ticketingType,
+        favTeam: query.favTeam,
+        gender: query.gender,
+        preferGender,
+        picked: query.picked,
+        note: query.note,
+      }),
     ]);
 
     const data = posts.map(
@@ -90,6 +135,8 @@ export class PostService {
           gameDate: post.gameDate,
           teamHome: post.teamHome,
           teamAway: post.teamAway,
+          postStatus: post.postStatus,
+          authorNickname: post.authorNickname,
           createdAt: post.createdAt.toISOString(),
         }),
     );

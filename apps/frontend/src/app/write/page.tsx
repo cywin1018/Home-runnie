@@ -1,13 +1,11 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
 import DateSelect from '@/shared/ui/write/date-select';
 import { RadioGroup } from '@/shared/ui/radio';
-import { BgmTag } from '@/shared/ui/tag/bgm-tag';
 import TeamDropdown from '@/shared/ui/dropdown/team-dropdown';
 import { CtaButton } from '@/shared/ui/button/cta-button';
 import { baseBallTeamItems, baseBallStadiumItems, Stadium } from '@homerunnie/shared';
@@ -15,6 +13,7 @@ import { useCreateRecruitmentPostMutation } from '@/hooks/post/usePostMutation';
 import { createChatRoom } from '@/apis/chat/chat';
 import { writeFormSchema, type WriteFormValues } from './schema';
 import { showToast, ToastIconType } from '@/shared/ui/toast/toast';
+import PickedTagsField from './components/picked-tags-field';
 
 export default function Page() {
   const router = useRouter();
@@ -23,8 +22,6 @@ export default function Page() {
     register,
     control,
     handleSubmit,
-    watch,
-    setValue,
     formState: { errors, isValid },
   } = useForm<WriteFormValues>({
     resolver: zodResolver(writeFormSchema),
@@ -54,34 +51,6 @@ export default function Page() {
       showToast(error.message || '게시글 작성에 실패했습니다.', ToastIconType.INFO);
     },
   });
-
-  const allTags = useMemo(
-    () => [
-      '응원가 부르는거 좋아해요',
-      '구경',
-      '테이블',
-      '경기보면서 맛있는거 먹기',
-      '응원석이 가까이 있는게 좋아요',
-      '응원석이 가까이 있는거 싫어요',
-      '햇빛 좋아요',
-      '햇빛 싫어요',
-      '사진',
-      '외야도',
-      '선수 가까이',
-    ],
-    [],
-  );
-
-  const picked = watch('picked') || [];
-
-  const toggleTag = (t: string) => {
-    const currentPicked = picked;
-    const newPicked = currentPicked.includes(t)
-      ? currentPicked.filter((x) => x !== t)
-      : [...currentPicked, t];
-
-    setValue('picked', newPicked);
-  };
 
   const onSubmit = (data: WriteFormValues) => {
     createPost({
@@ -313,28 +282,13 @@ export default function Page() {
 
             <div>
               <p className="mb-5 text-xl font-semibold leading-7 text-zinc-800">성향</p>
-
-              <div className="mb-5 flex flex-wrap gap-3">
-                {allTags.slice(0, 5).map((t) => (
-                  <BgmTag
-                    key={t}
-                    text={t}
-                    selected={picked.includes(t)}
-                    onClick={() => toggleTag(t)}
-                  />
-                ))}
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                {allTags.slice(5).map((t) => (
-                  <BgmTag
-                    key={t}
-                    text={t}
-                    selected={picked.includes(t)}
-                    onClick={() => toggleTag(t)}
-                  />
-                ))}
-              </div>
+              <Controller
+                name="picked"
+                control={control}
+                render={({ field }) => (
+                  <PickedTagsField value={field.value} onChange={(next) => field.onChange(next)} />
+                )}
+              />
             </div>
           </div>
         </section>

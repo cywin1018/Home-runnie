@@ -15,7 +15,7 @@ const formatGameDate = (gameDate: string) => {
 };
 
 export default function MateListBanner() {
-  const { data, isLoading } = useRecruitmentPostsQuery(1, 5);
+  const { data, isLoading } = useRecruitmentPostsQuery({ page: 1, pageSize: 5 });
   const posts = data?.data ?? [];
 
   return (

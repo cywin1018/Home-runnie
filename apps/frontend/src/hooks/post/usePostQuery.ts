@@ -5,12 +5,13 @@ import {
   getRecruitmentComments,
   getRecruitmentPostDetail,
   getRecruitmentPosts,
+  type GetRecruitmentPostsQueryParams,
 } from '@/apis/post/post';
 
-export const useRecruitmentPostsQuery = (page: number = 1, pageSize: number = 10) => {
+export const useRecruitmentPostsQuery = (params: GetRecruitmentPostsQueryParams = {}) => {
   return useQuery({
-    queryKey: ['recruitment-posts', page, pageSize],
-    queryFn: () => getRecruitmentPosts(page, pageSize),
+    queryKey: ['recruitment-posts', params],
+    queryFn: () => getRecruitmentPosts(params),
     retry: false,
   });
 };

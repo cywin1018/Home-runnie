@@ -14,6 +14,7 @@ import { PostService } from '@/post/service';
 import {
   CreateRecruitmentPostRequestDto,
   CreateRecruitmentPostResponseDto,
+  GetRecruitmentPostsQueryDto,
   GetRecruitmentPostDetailResponseDto,
   GetRecruitmentPostsResponseDto,
   UpdateRecruitmentPostStatusRequestDto,
@@ -22,7 +23,6 @@ import {
 import { CurrentMember } from '@/common';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { CreateRecruitmentPostSwagger } from '@/post/swagger';
-import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
 
 @Controller('post')
 export class PostController {
@@ -40,9 +40,9 @@ export class PostController {
 
   @Get('recruitment')
   async getRecruitmentPosts(
-    @Query() query: PaginationQueryDto,
+    @Query() query: GetRecruitmentPostsQueryDto,
   ): Promise<GetRecruitmentPostsResponseDto> {
-    return this.postService.getRecruitmentPosts(query.page, query.pageSize);
+    return this.postService.getRecruitmentPosts(query);
   }
 
   @Get('recruitment/:postId')
