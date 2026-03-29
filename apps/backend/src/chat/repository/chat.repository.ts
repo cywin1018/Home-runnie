@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq, and, desc, count } from 'drizzle-orm';
+import { eq, and, desc, count, sql } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '@/common';
 import { ChatRoom, ChatRoomMember, ChatMessage, ChatJoinRequest } from '@/chat/domain';
 import { ChatRoomMemberRole, ChatJoinRequestStatus } from '@homerunnie/shared';
@@ -59,6 +59,18 @@ export class ChatRepository {
         teamHome: RecruitmentDetail.teamHome,
         teamAway: RecruitmentDetail.teamAway,
         gameDate: RecruitmentDetail.gameDate,
+        lastMessage: sql<string | null>`(
+          SELECT ${ChatMessage.content} FROM ${ChatMessage}
+          WHERE ${ChatMessage.chatRoomId} = ${ChatRoom.id}
+          ORDER BY ${ChatMessage.createdAt} DESC
+          LIMIT 1
+        )`.as('last_message'),
+        lastMessageAt: sql<Date | null>`(
+          SELECT ${ChatMessage.createdAt} FROM ${ChatMessage}
+          WHERE ${ChatMessage.chatRoomId} = ${ChatRoom.id}
+          ORDER BY ${ChatMessage.createdAt} DESC
+          LIMIT 1
+        )`.as('last_message_at'),
       })
       .from(ChatRoom)
       .innerJoin(ChatRoomMember, eq(ChatRoom.id, ChatRoomMember.chatRoomId))
@@ -71,7 +83,14 @@ export class ChatRepository {
           eq(ChatRoomMember.deleted, false),
         ),
       )
-      .orderBy(desc(ChatRoom.updatedAt))
+      .orderBy(
+        sql`COALESCE((
+          SELECT ${ChatMessage.createdAt} FROM ${ChatMessage}
+          WHERE ${ChatMessage.chatRoomId} = ${ChatRoom.id}
+          ORDER BY ${ChatMessage.createdAt} DESC
+          LIMIT 1
+        ), ${ChatRoom.updatedAt}) DESC`,
+      )
       .limit(limit)
       .offset(offset);
 
@@ -120,6 +139,13 @@ export class ChatRepository {
       .where(and(eq(ChatRoom.id, chatRoomId), eq(ChatRoom.deleted, false)));
 
     return result?.postStatus || null;
+  }
+
+  async updateChatRoomUpdatedAt(chatRoomId: number) {
+    await this.db
+      .update(ChatRoom)
+      .set({ updatedAt: new Date() })
+      .where(eq(ChatRoom.id, chatRoomId));
   }
 
   async saveMessage(chatRoomId: number, senderId: number, content: string) {

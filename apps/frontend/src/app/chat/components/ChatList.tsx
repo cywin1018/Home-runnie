@@ -2,15 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { ChatRoomMemberRole } from '@homerunnie/shared';
-
-interface ChatListItem {
-  id: string;
-  title: string;
-  participants: string[];
-  lastMessage: string;
-  unreadCount: number;
-  role?: ChatRoomMemberRole;
-}
+import { ChatListItem } from '../layout';
 
 interface ChatListProps {
   chatRooms?: ChatListItem[];

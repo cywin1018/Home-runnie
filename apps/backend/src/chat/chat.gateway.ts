@@ -121,10 +121,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const { nickname, memberId } = user;
     const chatRoomId = parseInt(roomId, 10);
 
-    await this.chatRepository.saveMessage(chatRoomId, memberId, message);
+    await Promise.all([
+      this.chatRepository.saveMessage(chatRoomId, memberId, message),
+      this.chatRepository.updateChatRoomUpdatedAt(chatRoomId),
+    ]);
 
-    socket.to(roomId).emit('received_message', { nickname, message, isOwn: false });
-    socket.emit('received_message', { nickname, message, isOwn: true });
+    socket.to(roomId).emit('received_message', { nickname, message, isOwn: false, roomId });
+    socket.emit('received_message', { nickname, message, isOwn: true, roomId });
   }
 
   emitToRoom(roomId: string, event: string, data: unknown) {

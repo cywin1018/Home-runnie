@@ -8,6 +8,8 @@ export interface ChatRoomResponse {
   teamHome: string | null;
   teamAway: string | null;
   gameDate: string | null;
+  lastMessage: string | null;
+  lastMessageAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }

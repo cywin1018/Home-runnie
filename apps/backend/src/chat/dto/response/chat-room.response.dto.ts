@@ -55,6 +55,22 @@ export class ChatRoomResponseDto implements ChatRoomResponse {
   gameDate: string | null;
 
   @ApiProperty({
+    description: '마지막 메시지',
+    type: 'string',
+    example: '오늘 경기 몇 시에 만날까요?',
+    nullable: true,
+  })
+  lastMessage: string | null;
+
+  @ApiProperty({
+    description: '마지막 메시지 시간',
+    type: 'string',
+    example: '2024-01-17T12:00:00Z',
+    nullable: true,
+  })
+  lastMessageAt: Date | null;
+
+  @ApiProperty({
     description: '생성 일시',
     type: 'string',
     example: '2024-01-17T12:00:00Z',
@@ -82,6 +98,8 @@ export class ChatRoomResponseDto implements ChatRoomResponse {
     teamHome?: string | null;
     teamAway?: string | null;
     gameDate?: string | null;
+    lastMessage?: string | null;
+    lastMessageAt?: Date | null;
   }): ChatRoomResponseDto {
     return new ChatRoomResponseDto({
       id: data.id,
@@ -91,6 +109,8 @@ export class ChatRoomResponseDto implements ChatRoomResponse {
       teamHome: data.teamHome ?? null,
       teamAway: data.teamAway ?? null,
       gameDate: data.gameDate ?? null,
+      lastMessage: data.lastMessage ?? null,
+      lastMessageAt: data.lastMessageAt ?? null,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
     });
