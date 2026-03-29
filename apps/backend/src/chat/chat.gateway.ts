@@ -64,6 +64,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       socket.data.user = {
         memberId: payload.memberId,
         nickname: profile.nickname,
+        supportTeam: profile.supportTeam,
         roomIds: new Set<string>(),
       } satisfies WsSocketUser;
 
@@ -100,6 +101,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         message: msg.content,
         isOwn: msg.senderId === user.memberId,
         nickname: msg.nickname,
+        supportTeam: msg.supportTeam,
         createdAt: msg.createdAt,
       })),
     );
@@ -118,7 +120,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if (!user.roomIds.has(roomId)) return;
 
-    const { nickname, memberId } = user;
+    const { nickname, memberId, supportTeam } = user;
     const chatRoomId = parseInt(roomId, 10);
 
     await Promise.all([
@@ -126,8 +128,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.chatRepository.updateChatRoomUpdatedAt(chatRoomId),
     ]);
 
-    socket.to(roomId).emit('received_message', { nickname, message, isOwn: false, roomId });
-    socket.emit('received_message', { nickname, message, isOwn: true, roomId });
+    socket
+      .to(roomId)
+      .emit('received_message', { nickname, message, isOwn: false, roomId, supportTeam });
+    socket.emit('received_message', { nickname, message, isOwn: true, roomId, supportTeam });
   }
 
   emitToRoom(roomId: string, event: string, data: unknown) {

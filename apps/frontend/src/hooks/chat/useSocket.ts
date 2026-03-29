@@ -3,11 +3,14 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 
+const SYSTEM_PREFIX = '[SYSTEM]';
+
 export interface ChatMessage {
   id: number;
   text: string;
-  sender: 'me' | 'other';
+  sender: 'me' | 'other' | 'system';
   nickname: string;
+  supportTeam: string | null;
 }
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
@@ -39,44 +42,56 @@ export function useSocket(roomId: string) {
           message: string;
           isOwn: boolean;
           nickname: string;
+          supportTeam: string | null;
           createdAt: string;
         }[],
       ) => {
         setMessages(
-          history.map((msg) => ({
-            id: msg.id,
-            text: msg.message,
-            sender: msg.isOwn ? 'me' : ('other' as const),
-            nickname: msg.isOwn ? '' : msg.nickname,
-          })),
+          history.map((msg) => {
+            const isSystem = msg.message.startsWith(SYSTEM_PREFIX);
+            return {
+              id: msg.id,
+              text: isSystem ? msg.message.slice(SYSTEM_PREFIX.length) : msg.message,
+              sender: isSystem ? ('system' as const) : msg.isOwn ? 'me' : ('other' as const),
+              nickname: isSystem ? '' : msg.isOwn ? '' : msg.nickname,
+              supportTeam: isSystem ? null : msg.supportTeam,
+            };
+          }),
         );
       },
     );
 
-    socket.on('received_message', (data: { nickname: string; message: string; isOwn: boolean }) => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          text: data.message,
-          sender: data.isOwn ? 'me' : 'other',
-          nickname: data.nickname,
-        },
-      ]);
-    });
+    socket.on(
+      'received_message',
+      (data: {
+        nickname: string;
+        message: string;
+        isOwn: boolean;
+        supportTeam?: string | null;
+      }) => {
+        const isSystem = data.message.startsWith(SYSTEM_PREFIX);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now(),
+            text: isSystem ? data.message.slice(SYSTEM_PREFIX.length) : data.message,
+            sender: isSystem ? 'system' : data.isOwn ? 'me' : 'other',
+            nickname: isSystem ? '' : data.nickname,
+            supportTeam: isSystem ? null : (data.supportTeam ?? null),
+          },
+        ]);
+      },
+    );
 
     socket.on('join_request_received', () => {
       setJoinRequestCount((prev) => prev + 1);
     });
 
-    socket.on('member_joined', (data: { memberId: number }) => {
-      setMessages((prev) => [
-        ...prev,
-        { id: Date.now(), text: '새로운 멤버가 참여했습니다.', sender: 'other', nickname: '' },
-      ]);
+    socket.on('member_joined', () => {
+      // 시스템 메시지는 백엔드에서 저장 후 received_message로 전달됨
     });
 
-    socket.on('member_kicked', (data: { memberId: number }) => {
+    socket.on('member_kicked', () => {
       setKickedFromRoom(true);
     });
 

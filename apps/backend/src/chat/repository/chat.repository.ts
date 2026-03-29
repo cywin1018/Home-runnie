@@ -165,6 +165,7 @@ export class ChatRepository {
         senderId: ChatMessage.senderId,
         createdAt: ChatMessage.createdAt,
         nickname: Profile.nickname,
+        supportTeam: Profile.supportTeam,
       })
       .from(ChatMessage)
       .innerJoin(Profile, eq(ChatMessage.senderId, Profile.memberId))

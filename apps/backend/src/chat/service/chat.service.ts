@@ -174,8 +174,19 @@ export class ChatService {
       );
     });
 
+    // 시스템 메시지를 DB에 저장하고 브로드캐스트
+    const systemMessage = '[SYSTEM]새로운 멤버가 참여했습니다.';
+    await this.chatRepository.saveMessage(request.chatRoomId, request.memberId, systemMessage);
+
     this.chatGateway.emitMemberJoined(String(request.chatRoomId), {
       memberId: request.memberId,
+    });
+
+    this.chatGateway.emitToRoom(String(request.chatRoomId), 'received_message', {
+      nickname: '',
+      message: systemMessage,
+      isOwn: false,
+      roomId: String(request.chatRoomId),
     });
 
     return { chatRoomId: request.chatRoomId, memberId: request.memberId };
