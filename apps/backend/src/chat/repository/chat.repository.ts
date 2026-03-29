@@ -71,6 +71,12 @@ export class ChatRepository {
           ORDER BY ${ChatMessage.createdAt} DESC
           LIMIT 1
         )`.as('last_message_at'),
+        unreadCount: sql<number>`(
+          SELECT COUNT(*) FROM ${ChatMessage}
+          WHERE ${ChatMessage.chatRoomId} = ${ChatRoom.id}
+          AND ${ChatMessage.createdAt} > ${ChatRoomMember.lastReadAt}
+          AND ${ChatMessage.senderId} != ${ChatRoomMember.memberId}
+        )`.as('unread_count'),
       })
       .from(ChatRoom)
       .innerJoin(ChatRoomMember, eq(ChatRoom.id, ChatRoomMember.chatRoomId))
@@ -146,6 +152,19 @@ export class ChatRepository {
       .update(ChatRoom)
       .set({ updatedAt: new Date() })
       .where(eq(ChatRoom.id, chatRoomId));
+  }
+
+  async updateLastReadAt(chatRoomId: number, memberId: number) {
+    await this.db
+      .update(ChatRoomMember)
+      .set({ lastReadAt: new Date() })
+      .where(
+        and(
+          eq(ChatRoomMember.chatRoomId, chatRoomId),
+          eq(ChatRoomMember.memberId, memberId),
+          eq(ChatRoomMember.deleted, false),
+        ),
+      );
   }
 
   async saveMessage(chatRoomId: number, senderId: number, content: string) {
@@ -259,6 +278,7 @@ export class ChatRepository {
         status: ChatJoinRequest.status,
         createdAt: ChatJoinRequest.createdAt,
         nickname: Profile.nickname,
+        supportTeam: Profile.supportTeam,
         gender: Member.gender,
         birthDate: Member.birthDate,
       })

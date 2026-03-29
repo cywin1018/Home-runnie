@@ -10,6 +10,7 @@ export interface ChatRoomResponse {
   gameDate: string | null;
   lastMessage: string | null;
   lastMessageAt: Date | null;
+  unreadCount: number;
   createdAt: Date;
   updatedAt: Date;
 }

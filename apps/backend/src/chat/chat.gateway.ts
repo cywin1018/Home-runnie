@@ -93,6 +93,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     socket.join(roomId);
     user.roomIds.add(roomId);
 
+    // 읽음 처리
+    await this.chatRepository.updateLastReadAt(chatRoomId, user.memberId);
+
     const history = await this.chatRepository.findMessagesByRoomId(chatRoomId);
     socket.emit(
       'message_history',

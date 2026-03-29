@@ -1,18 +1,25 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User } from 'lucide-react';
-import { JoinRequestResponse } from '@homerunnie/shared';
+import Image from 'next/image';
+import { JoinRequestResponse, Team, TEAM_ASSETS, DEFAULT_PROFILE_IMAGE } from '@homerunnie/shared';
 import { getPendingJoinRequests, acceptJoinRequest, rejectJoinRequest } from '@/apis/chat/chat';
 
 interface JoinRequestDropdownProps {
   roomId: string;
 }
 
+const getProfileImage = (supportTeam: string | null | undefined): string => {
+  if (supportTeam && TEAM_ASSETS[supportTeam as Team]?.image) {
+    return TEAM_ASSETS[supportTeam as Team]!.image;
+  }
+  return DEFAULT_PROFILE_IMAGE;
+};
+
 const JoinRequestDropdown = ({ roomId }: JoinRequestDropdownProps) => {
   const [requests, setRequests] = useState<JoinRequestResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedRequest, setSelectedRequest] = useState<JoinRequestResponse | null>(null);
+  const [hoveredRequest, setHoveredRequest] = useState<JoinRequestResponse | null>(null);
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -32,7 +39,7 @@ const JoinRequestDropdown = ({ roomId }: JoinRequestDropdownProps) => {
     try {
       await acceptJoinRequest(requestId);
       setRequests((prev) => prev.filter((r) => r.id !== requestId));
-      setSelectedRequest(null);
+      setHoveredRequest(null);
     } catch (error) {
       console.error('수락 실패:', error);
     }
@@ -42,7 +49,7 @@ const JoinRequestDropdown = ({ roomId }: JoinRequestDropdownProps) => {
     try {
       await rejectJoinRequest(requestId);
       setRequests((prev) => prev.filter((r) => r.id !== requestId));
-      setSelectedRequest(null);
+      setHoveredRequest(null);
     } catch (error) {
       console.error('거절 실패:', error);
     }
@@ -50,22 +57,28 @@ const JoinRequestDropdown = ({ roomId }: JoinRequestDropdownProps) => {
 
   return (
     <div className="absolute right-0 top-full mt-2 z-50 flex gap-2">
-      {/* 프로필 카드 (선택 시) */}
-      {selectedRequest && (
+      {/* 프로필 카드 (호버 시) */}
+      {hoveredRequest && (
         <div className="bg-white rounded-xl shadow-lg p-8 w-[250px] flex flex-col items-center">
-          <div className="w-24 h-24 rounded-full bg-pink-100 flex items-center justify-center mb-4">
-            <User className="w-12 h-12 text-pink-500" />
+          <div className="w-24 h-24 rounded-full overflow-hidden mb-4">
+            <Image
+              src={getProfileImage(hoveredRequest.supportTeam)}
+              alt={hoveredRequest.nickname}
+              width={96}
+              height={96}
+              className="w-full h-full object-cover"
+            />
           </div>
-          <p className="text-xl font-semibold mb-4">{selectedRequest.nickname}</p>
+          <p className="text-xl font-semibold mb-4">{hoveredRequest.nickname}</p>
           <div className="text-b02-r text-gray-600 space-y-2 w-full">
             <div className="flex gap-4 justify-center">
               <span className="text-gray-500">성별</span>
-              <span className="text-gray-900">{selectedRequest.gender ?? '-'}</span>
+              <span className="text-gray-900">{hoveredRequest.gender ?? '-'}</span>
             </div>
             <div className="flex gap-4 justify-center">
               <span className="text-gray-500">나이</span>
               <span className="text-gray-900">
-                {selectedRequest.birthDate ? `${selectedRequest.birthDate.slice(2, 4)}년생` : '-'}
+                {hoveredRequest.birthDate ? `${hoveredRequest.birthDate.slice(2, 4)}년생` : '-'}
               </span>
             </div>
           </div>
@@ -83,34 +96,31 @@ const JoinRequestDropdown = ({ roomId }: JoinRequestDropdownProps) => {
             {requests.map((request) => (
               <div
                 key={request.id}
-                className={`flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors ${
-                  selectedRequest?.id === request.id ? 'bg-gray-50' : ''
-                }`}
-                onClick={() =>
-                  setSelectedRequest(selectedRequest?.id === request.id ? null : request)
-                }
+                className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors"
+                onMouseEnter={() => setHoveredRequest(request)}
+                onMouseLeave={() => setHoveredRequest(null)}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center shrink-0">
-                    <User className="w-5 h-5 text-pink-500" />
+                  <div className="w-9 h-9 rounded-full overflow-hidden shrink-0">
+                    <Image
+                      src={getProfileImage(request.supportTeam)}
+                      alt={request.nickname}
+                      width={36}
+                      height={36}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <span className="text-b02-r text-gray-900">{request.nickname}</span>
                 </div>
                 <div className="flex gap-3">
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAccept(request.id);
-                    }}
+                    onClick={() => handleAccept(request.id)}
                     className="text-b02-r text-green-600 hover:bg-gray-100 rounded px-2 py-1 transition-colors cursor-pointer"
                   >
                     수락
                   </button>
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleReject(request.id);
-                    }}
+                    onClick={() => handleReject(request.id)}
                     className="text-b02-r text-red-500 hover:bg-gray-100 rounded px-2 py-1 transition-colors cursor-pointer"
                   >
                     거절

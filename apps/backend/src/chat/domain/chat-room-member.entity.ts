@@ -1,9 +1,10 @@
-import { integer, pgTable, unique } from 'drizzle-orm/pg-core';
+import { integer, pgTable, timestamp, unique } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { baseColumns } from '@/common/db/base.entity';
 import { chatRoomMemberRolePgEnum } from '@/common/db/enums';
 import { ChatRoom } from '@/chat/domain/chat-room.entity';
 import { Member } from '@/member/domain';
+import { sql } from 'drizzle-orm';
 
 export { chatRoomMemberRolePgEnum };
 
@@ -18,6 +19,9 @@ export const ChatRoomMember = pgTable(
     memberId: integer('member_id')
       .notNull()
       .references(() => Member.id),
+    lastReadAt: timestamp('last_read_at', { mode: 'date' })
+      .notNull()
+      .default(sql`now()`),
   },
   (table) => ({
     uniqueMemberChatRoom: unique().on(table.chatRoomId, table.memberId),
