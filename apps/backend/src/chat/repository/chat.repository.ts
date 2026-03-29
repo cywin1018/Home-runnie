@@ -71,6 +71,12 @@ export class ChatRepository {
           ORDER BY ${ChatMessage.createdAt} DESC
           LIMIT 1
         )`.as('last_message_at'),
+        unreadCount: sql<number>`(
+          SELECT COUNT(*) FROM ${ChatMessage}
+          WHERE ${ChatMessage.chatRoomId} = ${ChatRoom.id}
+          AND ${ChatMessage.createdAt} > ${ChatRoomMember.lastReadAt}
+          AND ${ChatMessage.senderId} != ${ChatRoomMember.memberId}
+        )`.as('unread_count'),
       })
       .from(ChatRoom)
       .innerJoin(ChatRoomMember, eq(ChatRoom.id, ChatRoomMember.chatRoomId))
@@ -141,11 +147,35 @@ export class ChatRepository {
     return result?.postStatus || null;
   }
 
+  async findGameDateByChatRoomId(chatRoomId: number): Promise<string | null> {
+    const [result] = await this.db
+      .select({ gameDate: RecruitmentDetail.gameDate })
+      .from(ChatRoom)
+      .innerJoin(Post, eq(ChatRoom.postId, Post.id))
+      .innerJoin(RecruitmentDetail, eq(Post.id, RecruitmentDetail.postId))
+      .where(and(eq(ChatRoom.id, chatRoomId), eq(ChatRoom.deleted, false)));
+
+    return result?.gameDate || null;
+  }
+
   async updateChatRoomUpdatedAt(chatRoomId: number) {
     await this.db
       .update(ChatRoom)
       .set({ updatedAt: new Date() })
       .where(eq(ChatRoom.id, chatRoomId));
+  }
+
+  async updateLastReadAt(chatRoomId: number, memberId: number) {
+    await this.db
+      .update(ChatRoomMember)
+      .set({ lastReadAt: new Date() })
+      .where(
+        and(
+          eq(ChatRoomMember.chatRoomId, chatRoomId),
+          eq(ChatRoomMember.memberId, memberId),
+          eq(ChatRoomMember.deleted, false),
+        ),
+      );
   }
 
   async saveMessage(chatRoomId: number, senderId: number, content: string) {
@@ -165,6 +195,7 @@ export class ChatRepository {
         senderId: ChatMessage.senderId,
         createdAt: ChatMessage.createdAt,
         nickname: Profile.nickname,
+        supportTeam: Profile.supportTeam,
       })
       .from(ChatMessage)
       .innerJoin(Profile, eq(ChatMessage.senderId, Profile.memberId))
@@ -258,6 +289,7 @@ export class ChatRepository {
         status: ChatJoinRequest.status,
         createdAt: ChatJoinRequest.createdAt,
         nickname: Profile.nickname,
+        supportTeam: Profile.supportTeam,
         gender: Member.gender,
         birthDate: Member.birthDate,
       })

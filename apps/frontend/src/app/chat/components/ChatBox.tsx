@@ -2,13 +2,21 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import ChatInfo from './ChatInfo';
 import ChatInput from './ChatInput';
 import ChatReport from './ChatReport';
 import ChatInfoSidebar from './ChatInfoSidebar';
 import { useChatRooms } from '@/stores/ChatRoomsContext';
 import { getMyChatRooms, getChatRoomMembers } from '@/apis/chat/chat';
-import { ChatRoomResponse, ChatRoomMemberRole, TeamDescription, Team } from '@homerunnie/shared';
+import {
+  ChatRoomResponse,
+  ChatRoomMemberRole,
+  TeamDescription,
+  Team,
+  TEAM_ASSETS,
+  DEFAULT_PROFILE_IMAGE,
+} from '@homerunnie/shared';
 import { useState } from 'react';
 import { useSocket } from '@/hooks/chat/useSocket';
 import { ReportParticipant } from '@/shared/ui/modal/ReportModal';
@@ -173,7 +181,7 @@ const ChatBox = ({ roomId }: { roomId: string }) => {
           onJoinRequestOpen={resetJoinRequestCount}
         />
         <section
-          className={`flex flex-col h-full py-6 transition-all duration-300 ease-in-out ${
+          className={`flex flex-col flex-1 min-h-0 py-6 transition-all duration-300 ease-in-out ${
             isSidebarOpen ? 'px-[30px]' : 'px-[120px]'
           }`}
         >
@@ -184,37 +192,54 @@ const ChatBox = ({ roomId }: { roomId: string }) => {
             participants={reportParticipants}
           />
 
-          <div className="grow flex flex-col justify-end gap-4 overflow-y-auto mb-6">
+          <div className="grow flex flex-col justify-end gap-4 overflow-y-auto min-h-0 mb-6">
             {!connected && <p className="text-center text-sm text-gray-400">서버에 연결 중...</p>}
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div>
-                  {msg.sender === 'other' && msg.nickname && (
-                    <p className="text-sm text-gray-500 mb-1">{msg.nickname}</p>
-                  )}
-                  <div className="flex items-end gap-2">
+            {messages.map((msg) =>
+              msg.sender === 'system' ? (
+                <div key={msg.id} className="flex justify-center">
+                  <p className="text-xs text-gray-400 bg-gray-200 rounded-full px-3 py-1">
+                    {msg.text}
+                  </p>
+                </div>
+              ) : (
+                <div
+                  key={msg.id}
+                  className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div>
                     {msg.sender === 'other' && msg.nickname && (
-                      <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center shrink-0">
-                        <span className="text-pink-500 text-xs">{msg.nickname.charAt(0)}</span>
-                      </div>
+                      <p className="text-sm text-gray-500 mb-1">{msg.nickname}</p>
                     )}
-                    <div
-                      className={[
-                        'rounded-2xl px-4 py-2 max-w-xs lg:max-w-md',
-                        msg.sender === 'me'
-                          ? 'bg-green-500 text-white rounded-br-none'
-                          : 'bg-white text-black rounded-bl-none',
-                      ].join(' ')}
-                    >
-                      {msg.text}
+                    <div className="flex items-end gap-2">
+                      {msg.sender === 'other' && msg.nickname && (
+                        <div className="w-8 h-8 rounded-full overflow-hidden shrink-0">
+                          <Image
+                            src={
+                              (msg.supportTeam && TEAM_ASSETS[msg.supportTeam as Team]?.image) ||
+                              DEFAULT_PROFILE_IMAGE
+                            }
+                            alt={msg.nickname}
+                            width={32}
+                            height={32}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <div
+                        className={[
+                          'rounded-2xl px-4 py-2 max-w-xs lg:max-w-md',
+                          msg.sender === 'me'
+                            ? 'bg-green-500 text-white rounded-br-none'
+                            : 'bg-white text-black rounded-bl-none',
+                        ].join(' ')}
+                      >
+                        {msg.text}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ),
+            )}
           </div>
 
           <div className="shrink-0">

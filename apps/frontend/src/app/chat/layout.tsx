@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { io, Socket } from 'socket.io-client';
 import ChatList from './components/ChatList';
 import { getMyChatRooms, getChatRoomMembers } from '@/apis/chat/chat';
@@ -20,9 +21,23 @@ export interface ChatListItem {
 }
 
 export default function ChatLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const activeChatId = pathname?.match(/\/chat\/(\d+)/)?.[1] ?? '';
+
   const [chatRooms, setChatRooms] = useState<ChatListItem[]>([]);
   const socketRef = useRef<Socket | null>(null);
   const roomIdsRef = useRef<string[]>([]);
+  const activeChatIdRef = useRef(activeChatId);
+
+  // activeChatId가 변경되면 ref 동기화 및 해당 방 unreadCount 초기화
+  useEffect(() => {
+    activeChatIdRef.current = activeChatId;
+    if (activeChatId) {
+      setChatRooms((prev) =>
+        prev.map((room) => (room.id === activeChatId ? { ...room, unreadCount: 0 } : room)),
+      );
+    }
+  }, [activeChatId]);
 
   // API로 가져온 채팅방 정보를 저장 (ChatBox에서 사용)
   const [chatRoomsMap, setChatRoomsMap] = useState<Map<string, ChatRoomResponse>>(new Map());
@@ -76,7 +91,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
             participants: members,
             lastMessage: room.lastMessage ?? '새로운 메시지가 없습니다.',
             lastMessageAt: room.lastMessageAt ?? null,
-            unreadCount: 0,
+            unreadCount: room.unreadCount ?? 0,
             role: room.role,
           };
         });
@@ -110,6 +125,14 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
       (data: { nickname: string; message: string; isOwn: boolean; roomId?: string }) => {
         if (data.roomId) {
           updateRoomLastMessage(data.roomId, data.message);
+          // 현재 보고 있지 않은 방이고, 내 메시지가 아니면 unreadCount 증가
+          if (data.roomId !== activeChatIdRef.current && !data.isOwn) {
+            setChatRooms((prev) =>
+              prev.map((room) =>
+                room.id === data.roomId ? { ...room, unreadCount: room.unreadCount + 1 } : room,
+              ),
+            );
+          }
         }
       },
     );
@@ -132,7 +155,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
         </div>
         <div className="flex-1 overflow-hidden">
           <ChatRoomsContext.Provider value={chatRoomsMap}>
-            <ChatList chatRooms={chatRooms} activeChatId="" />
+            <ChatList chatRooms={chatRooms} activeChatId={activeChatId} />
           </ChatRoomsContext.Provider>
         </div>
       </aside>

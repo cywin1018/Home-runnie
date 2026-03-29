@@ -81,11 +81,12 @@ export class ChatService {
   }
 
   async requestJoinChatRoom(chatRoomId: number, memberId: number) {
-    const [chatRoom, existingMember, existingRequest, postStatus] = await Promise.all([
+    const [chatRoom, existingMember, existingRequest, postStatus, gameDate] = await Promise.all([
       this.chatRepository.findChatRoomById(chatRoomId),
       this.chatRepository.findChatRoomMember(chatRoomId, memberId),
       this.chatRepository.findExistingJoinRequest(chatRoomId, memberId),
       this.chatRepository.findPostStatusByChatRoomId(chatRoomId),
+      this.chatRepository.findGameDateByChatRoomId(chatRoomId),
     ]);
 
     if (!chatRoom) {
@@ -93,6 +94,9 @@ export class ChatService {
     }
     if (postStatus !== PostStatusEnum.ACTIVE) {
       throw new BadRequestException('마감된 모집글에는 참여 요청을 할 수 없습니다.');
+    }
+    if (gameDate && new Date(gameDate) < new Date()) {
+      throw new BadRequestException('경기 날짜가 지난 모집글에는 참여 요청을 할 수 없습니다.');
     }
     if (existingMember) {
       throw new ConflictException('이미 채팅방에 참여 중입니다.');
@@ -174,8 +178,19 @@ export class ChatService {
       );
     });
 
+    // 시스템 메시지를 DB에 저장하고 브로드캐스트
+    const systemMessage = '[SYSTEM]새로운 멤버가 참여했습니다.';
+    await this.chatRepository.saveMessage(request.chatRoomId, request.memberId, systemMessage);
+
     this.chatGateway.emitMemberJoined(String(request.chatRoomId), {
       memberId: request.memberId,
+    });
+
+    this.chatGateway.emitToRoom(String(request.chatRoomId), 'received_message', {
+      nickname: '',
+      message: systemMessage,
+      isOwn: false,
+      roomId: String(request.chatRoomId),
     });
 
     return { chatRoomId: request.chatRoomId, memberId: request.memberId };

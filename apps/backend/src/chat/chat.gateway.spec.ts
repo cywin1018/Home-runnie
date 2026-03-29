@@ -119,7 +119,12 @@ describe('ChatGateway', () => {
     });
 
     it('socket.data.user가 있으면 참여 중인 방에 퇴장 알림을 보낸다', () => {
-      const user: WsSocketUser = { memberId: 1, nickname: '테스터', roomIds: new Set(['room1']) };
+      const user: WsSocketUser = {
+        memberId: 1,
+        nickname: '테스터',
+        supportTeam: null,
+        roomIds: new Set(['room1']),
+      };
       const socket = createMockSocket('user-1', user);
 
       gateway.handleDisconnect(socket as unknown as Socket);
@@ -130,7 +135,12 @@ describe('ChatGateway', () => {
 
   describe('handleJoinRoom', () => {
     it('방에 join하고 message_history를 emit한다', async () => {
-      const user: WsSocketUser = { memberId: 1, nickname: '테스터', roomIds: new Set() };
+      const user: WsSocketUser = {
+        memberId: 1,
+        nickname: '테스터',
+        supportTeam: null,
+        roomIds: new Set(),
+      };
       const socket = createMockSocket('user-1', user);
       mockChatRepository.findMessagesByRoomId.mockResolvedValue([]);
 
@@ -142,7 +152,12 @@ describe('ChatGateway', () => {
     });
 
     it('방 전체에 입장 메시지를 보낸다', async () => {
-      const user: WsSocketUser = { memberId: 1, nickname: '테스터', roomIds: new Set() };
+      const user: WsSocketUser = {
+        memberId: 1,
+        nickname: '테스터',
+        supportTeam: null,
+        roomIds: new Set(),
+      };
       const socket = createMockSocket('user-1', user);
       mockChatRepository.findMessagesByRoomId.mockResolvedValue([]);
 
@@ -159,7 +174,12 @@ describe('ChatGateway', () => {
 
   describe('handleMessage', () => {
     it('참여하지 않은 방이면 메시지를 전송하지 않는다', async () => {
-      const user: WsSocketUser = { memberId: 1, nickname: '테스터', roomIds: new Set() };
+      const user: WsSocketUser = {
+        memberId: 1,
+        nickname: '테스터',
+        supportTeam: null,
+        roomIds: new Set(),
+      };
       const socket = createMockSocket('user-1', user);
 
       await gateway.handleMessage(
@@ -173,7 +193,12 @@ describe('ChatGateway', () => {
     });
 
     it('나를 제외한 방 사람들에게 isOwn: false로 메시지를 전송한다', async () => {
-      const user: WsSocketUser = { memberId: 1, nickname: '테스터', roomIds: new Set(['room1']) };
+      const user: WsSocketUser = {
+        memberId: 1,
+        nickname: '테스터',
+        supportTeam: null,
+        roomIds: new Set(['room1']),
+      };
       const socket = createMockSocket('user-1', user);
 
       await gateway.handleMessage(
@@ -192,7 +217,12 @@ describe('ChatGateway', () => {
     });
 
     it('나에게 isOwn: true로 메시지를 전송한다', async () => {
-      const user: WsSocketUser = { memberId: 1, nickname: '테스터', roomIds: new Set(['room1']) };
+      const user: WsSocketUser = {
+        memberId: 1,
+        nickname: '테스터',
+        supportTeam: null,
+        roomIds: new Set(['room1']),
+      };
       const socket = createMockSocket('user-1', user);
 
       await gateway.handleMessage(

@@ -118,7 +118,8 @@ export default function RecruitmentPostDetailPage() {
 
   useEffect(() => {
     if (!data) return;
-    setIsRecruiting(data.postStatus === 'ACTIVE');
+    const isGameDatePassed = new Date(data.gameDate) < new Date();
+    setIsRecruiting(data.postStatus === 'ACTIVE' && !isGameDatePassed);
   }, [data]);
 
   if (isLoading) {

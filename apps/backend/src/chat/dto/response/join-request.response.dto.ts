@@ -17,6 +17,9 @@ export class JoinRequestResponseDto implements JoinRequestResponse {
   @ApiProperty({ description: '생년월일', example: '1999-01-01', nullable: true })
   birthDate: string | null;
 
+  @ApiProperty({ description: '응원팀', example: 'DOOSAN', nullable: true })
+  supportTeam: string | null;
+
   @ApiProperty({ description: '채팅방 ID', example: 1 })
   chatRoomId: number;
 
@@ -40,6 +43,7 @@ export class JoinRequestResponseDto implements JoinRequestResponse {
     nickname: string;
     gender: string | null;
     birthDate: string | null;
+    supportTeam?: string | null;
     chatRoomId: number;
     status: string;
     createdAt: Date;
@@ -50,6 +54,7 @@ export class JoinRequestResponseDto implements JoinRequestResponse {
       nickname: data.nickname,
       gender: data.gender,
       birthDate: data.birthDate,
+      supportTeam: data.supportTeam ?? null,
       chatRoomId: data.chatRoomId,
       status: data.status as ChatJoinRequestStatus,
       createdAt: data.createdAt,

@@ -71,6 +71,13 @@ export class ChatRoomResponseDto implements ChatRoomResponse {
   lastMessageAt: Date | null;
 
   @ApiProperty({
+    description: '안 읽은 메시지 수',
+    type: 'number',
+    example: 3,
+  })
+  unreadCount: number;
+
+  @ApiProperty({
     description: '생성 일시',
     type: 'string',
     example: '2024-01-17T12:00:00Z',
@@ -100,6 +107,7 @@ export class ChatRoomResponseDto implements ChatRoomResponse {
     gameDate?: string | null;
     lastMessage?: string | null;
     lastMessageAt?: Date | null;
+    unreadCount?: number;
   }): ChatRoomResponseDto {
     return new ChatRoomResponseDto({
       id: data.id,
@@ -111,6 +119,7 @@ export class ChatRoomResponseDto implements ChatRoomResponse {
       gameDate: data.gameDate ?? null,
       lastMessage: data.lastMessage ?? null,
       lastMessageAt: data.lastMessageAt ?? null,
+      unreadCount: data.unreadCount ?? 0,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
     });

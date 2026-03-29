@@ -6,6 +6,7 @@ export interface JoinRequestResponse {
   nickname: string;
   gender: string | null;
   birthDate: string | null;
+  supportTeam: string | null;
   chatRoomId: number;
   status: ChatJoinRequestStatus;
   createdAt: Date;

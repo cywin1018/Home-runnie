@@ -4,6 +4,7 @@ import { Socket } from 'socket.io';
 export interface WsSocketUser {
   memberId: number;
   nickname: string;
+  supportTeam: string | null;
   roomIds: Set<string>;
 }
 
