@@ -147,6 +147,17 @@ export class ChatRepository {
     return result?.postStatus || null;
   }
 
+  async findGameDateByChatRoomId(chatRoomId: number): Promise<string | null> {
+    const [result] = await this.db
+      .select({ gameDate: RecruitmentDetail.gameDate })
+      .from(ChatRoom)
+      .innerJoin(Post, eq(ChatRoom.postId, Post.id))
+      .innerJoin(RecruitmentDetail, eq(Post.id, RecruitmentDetail.postId))
+      .where(and(eq(ChatRoom.id, chatRoomId), eq(ChatRoom.deleted, false)));
+
+    return result?.gameDate || null;
+  }
+
   async updateChatRoomUpdatedAt(chatRoomId: number) {
     await this.db
       .update(ChatRoom)

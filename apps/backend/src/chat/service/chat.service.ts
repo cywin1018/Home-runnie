@@ -81,11 +81,12 @@ export class ChatService {
   }
 
   async requestJoinChatRoom(chatRoomId: number, memberId: number) {
-    const [chatRoom, existingMember, existingRequest, postStatus] = await Promise.all([
+    const [chatRoom, existingMember, existingRequest, postStatus, gameDate] = await Promise.all([
       this.chatRepository.findChatRoomById(chatRoomId),
       this.chatRepository.findChatRoomMember(chatRoomId, memberId),
       this.chatRepository.findExistingJoinRequest(chatRoomId, memberId),
       this.chatRepository.findPostStatusByChatRoomId(chatRoomId),
+      this.chatRepository.findGameDateByChatRoomId(chatRoomId),
     ]);
 
     if (!chatRoom) {
@@ -93,6 +94,9 @@ export class ChatService {
     }
     if (postStatus !== PostStatusEnum.ACTIVE) {
       throw new BadRequestException('마감된 모집글에는 참여 요청을 할 수 없습니다.');
+    }
+    if (gameDate && new Date(gameDate) < new Date()) {
+      throw new BadRequestException('경기 날짜가 지난 모집글에는 참여 요청을 할 수 없습니다.');
     }
     if (existingMember) {
       throw new ConflictException('이미 채팅방에 참여 중입니다.');
