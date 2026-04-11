@@ -22,7 +22,7 @@ function ChatLayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <ChatRoomsContext.Provider value={chatRoomsMap}>
-      <div className="flex flex-row justify-center h-[calc(100vh-84px)] -mx-5 w-[calc(100%+40px)] lg:-mx-[120px] lg:w-[calc(100%+240px)] max-w-none">
+      <div className="flex flex-row justify-center h-[calc(100vh-84px)] -mx-4 w-[calc(100%+32px)] sm:-mx-6 sm:w-[calc(100%+48px)] md:-mx-10 md:w-[calc(100%+80px)] lg:-mx-20 lg:w-[calc(100%+160px)] xl:-mx-[120px] xl:w-[calc(100%+240px)] max-w-none">
         <aside
           className={`${activeChatId ? 'hidden lg:flex' : 'flex'} flex-col w-full lg:w-auto lg:min-w-[400px] border-r border-gray-200 bg-white h-full`}
         >

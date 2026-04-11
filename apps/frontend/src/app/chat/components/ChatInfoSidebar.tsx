@@ -109,8 +109,15 @@ const ChatInfoSidebar = ({
 
   return (
     <>
+      {/* 모바일 배경 딤 */}
       <div
-        className={`bg-white border-l border-gray-200 shadow-lg transition-all duration-300 ease-in-out overflow-hidden lg:h-full lg:shrink-0 max-lg:absolute max-lg:right-0 max-lg:top-0 max-lg:bottom-0 max-lg:z-40 max-lg:w-full sm:max-lg:w-96 ${
+        onClick={onClose}
+        className={`lg:hidden fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 ${
+          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      />
+      <div
+        className={`bg-white border-l border-gray-200 shadow-lg transition-all duration-300 ease-in-out overflow-hidden lg:h-full lg:shrink-0 max-lg:fixed max-lg:right-0 max-lg:top-0 max-lg:bottom-0 max-lg:z-50 max-lg:w-full sm:max-lg:w-96 ${
           isOpen ? 'lg:w-96 max-lg:translate-x-0' : 'lg:w-0 lg:border-0 max-lg:translate-x-full'
         }`}
       >

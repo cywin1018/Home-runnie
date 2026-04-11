@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { LogIn, LogOut, MessageCircle, Menu, User, X } from 'lucide-react';
 import { useMyProfileQuery } from '@/hooks/my/useProfileQuery';
@@ -41,68 +42,70 @@ export default function Header() {
   };
 
   return (
-    <header className="w-screen h-20 bg-neutral-50 overflow-hidden">
-      <div className="max-w-[1440px] mx-auto h-full flex items-center justify-between px-5 lg:px-[120px] gap-3">
-        {/* 로고 */}
-        <Image
-          src="/images/typo-default.png"
-          alt="로고"
-          width={128}
-          height={20}
-          onClick={onClickHome}
-          className="cursor-pointer shrink-0 w-24 lg:w-32 h-auto"
-        />
-        {/* 오른쪽 메뉴 (PC) */}
-        <nav className="hidden lg:inline-flex justify-start items-center gap-5">
-          {!isLoading && isLogged && (
-            <>
-              <Link href="/chat">
+    <>
+      <header className="w-screen h-20 bg-neutral-50 overflow-hidden">
+        <div className="max-w-[1440px] mx-auto h-full flex items-center justify-between px-4 sm:px-6 md:px-10 lg:px-20 xl:px-[120px] gap-3">
+          {/* 로고 */}
+          <Image
+            src="/images/typo-default.png"
+            alt="로고"
+            width={128}
+            height={20}
+            onClick={onClickHome}
+            className="cursor-pointer shrink-0 w-24 lg:w-32 h-auto"
+          />
+          {/* 오른쪽 메뉴 (PC) */}
+          <nav className="hidden lg:inline-flex justify-start items-center gap-5">
+            {!isLoading && isLogged && (
+              <>
+                <Link href="/chat">
+                  <div className="px-3.5 py-2.5 rounded-[10px] flex justify-center items-center gap-2.5 hover:bg-gray-100 transition-colors">
+                    <div className="justify-start text-zinc-500 text-base font-medium leading-6">
+                      채팅
+                    </div>
+                  </div>
+                </Link>
+                <Link href="/my">
+                  <div className="px-3.5 py-2.5 rounded-[10px] flex justify-center items-center gap-2.5 hover:bg-gray-100 transition-colors">
+                    <div className="justify-start text-zinc-500 text-base font-medium leading-6">
+                      마이페이지
+                    </div>
+                  </div>
+                </Link>
+                <button
+                  type="button"
+                  onClick={onClickLogout}
+                  className="px-3.5 py-2.5 rounded-[10px] flex justify-center items-center gap-2.5 hover:bg-gray-100 transition-colors"
+                >
+                  <div className="justify-start text-neutral-400 text-base font-medium leading-6">
+                    로그아웃
+                  </div>
+                </button>
+              </>
+            )}
+            {!isLoading && !isLogged && (
+              <Link href="/login">
                 <div className="px-3.5 py-2.5 rounded-[10px] flex justify-center items-center gap-2.5 hover:bg-gray-100 transition-colors">
                   <div className="justify-start text-zinc-500 text-base font-medium leading-6">
-                    채팅
+                    로그인
                   </div>
                 </div>
               </Link>
-              <Link href="/my">
-                <div className="px-3.5 py-2.5 rounded-[10px] flex justify-center items-center gap-2.5 hover:bg-gray-100 transition-colors">
-                  <div className="justify-start text-zinc-500 text-base font-medium leading-6">
-                    마이페이지
-                  </div>
-                </div>
-              </Link>
-              <button
-                type="button"
-                onClick={onClickLogout}
-                className="px-3.5 py-2.5 rounded-[10px] flex justify-center items-center gap-2.5 hover:bg-gray-100 transition-colors"
-              >
-                <div className="justify-start text-neutral-400 text-base font-medium leading-6">
-                  로그아웃
-                </div>
-              </button>
-            </>
-          )}
-          {!isLoading && !isLogged && (
-            <Link href="/login">
-              <div className="px-3.5 py-2.5 rounded-[10px] flex justify-center items-center gap-2.5 hover:bg-gray-100 transition-colors">
-                <div className="justify-start text-zinc-500 text-base font-medium leading-6">
-                  로그인
-                </div>
-              </div>
-            </Link>
-          )}
-        </nav>
-        {/* 모바일 햄버거 버튼 */}
-        <button
-          type="button"
-          onClick={() => setIsSidebarOpen(true)}
-          aria-label="메뉴 열기"
-          className="lg:hidden p-2 rounded-[10px] hover:bg-gray-100 transition-colors shrink-0"
-        >
-          <Menu className="w-6 h-6 text-zinc-700" />
-        </button>
-      </div>
+            )}
+          </nav>
+          {/* 모바일 햄버거 버튼 */}
+          <button
+            type="button"
+            onClick={() => setIsSidebarOpen(true)}
+            aria-label="메뉴 열기"
+            className="lg:hidden p-2 rounded-[10px] hover:bg-gray-100 transition-colors shrink-0"
+          >
+            <Menu className="w-6 h-6 text-zinc-700" />
+          </button>
+        </div>
+      </header>
 
-      {/* 모바일 사이드바 */}
+      {/* 모바일 사이드바 — header 밖에 배치하여 overflow-hidden 영향을 받지 않음 */}
       <div
         onClick={closeSidebar}
         className={`lg:hidden fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 ${
@@ -168,6 +171,6 @@ export default function Header() {
           )}
         </nav>
       </aside>
-    </header>
+    </>
   );
 }
