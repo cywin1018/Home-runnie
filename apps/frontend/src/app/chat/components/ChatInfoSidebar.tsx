@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { User, Check } from 'lucide-react';
+import { User, Check, X } from 'lucide-react';
 import { ChatRoomMemberRole, ChatRoomMemberResponse } from '@homerunnie/shared';
 import { kickMember, deleteChatRoom } from '@/apis/chat/chat';
 import { useRouter } from 'next/navigation';
@@ -110,13 +110,21 @@ const ChatInfoSidebar = ({
   return (
     <>
       <div
-        className={`h-full bg-white border-l border-gray-200 shadow-lg shrink-0 transition-all duration-300 ease-in-out overflow-hidden ${
-          isOpen ? 'w-96' : 'w-0 border-0'
+        className={`bg-white border-l border-gray-200 shadow-lg transition-all duration-300 ease-in-out overflow-hidden lg:h-full lg:shrink-0 max-lg:absolute max-lg:right-0 max-lg:top-0 max-lg:bottom-0 max-lg:z-40 max-lg:w-full sm:max-lg:w-96 ${
+          isOpen ? 'lg:w-96 max-lg:translate-x-0' : 'lg:w-0 lg:border-0 max-lg:translate-x-full'
         }`}
       >
         <div className="flex flex-col h-full">
-          <div className="flex items-center px-[20px] py-[16px] border-b border-gray-200">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
             <h2 className="text-t01-sb">상세정보</h2>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="상세정보 닫기"
+              className="lg:hidden p-1 hover:bg-gray-100 rounded transition-colors cursor-pointer"
+            >
+              <X className="w-6 h-6 text-gray-600" />
+            </button>
           </div>
 
           <div className="flex-1 overflow-y-auto">

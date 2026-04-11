@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Mail, Menu } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ChevronLeft, Mail, Menu } from 'lucide-react';
 import { ChatRoomMemberRole } from '@homerunnie/shared';
 import JoinRequestDropdown from './JoinRequestDropdown';
 
@@ -28,6 +29,7 @@ const ChatInfo = ({
   joinRequestCount = 0,
   onJoinRequestOpen,
 }: ChatInfoProps) => {
+  const router = useRouter();
   const [showJoinRequests, setShowJoinRequests] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -49,11 +51,19 @@ const ChatInfo = ({
   };
 
   return (
-    <div className="bg-white shadow-sm px-[20px] py-[16px] w-full">
-      <div className="flex items-center justify-between">
-        <div className="justify-center items-center flex gap-[24px]">
-          <h1 className="text-t01-sb text-gray-900">{title}</h1>
-          <div className="flex items-center gap-6">
+    <div className="bg-white shadow-sm px-5 py-4 w-full">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 lg:gap-6 min-w-0 flex-1">
+          <button
+            type="button"
+            onClick={() => router.push('/chat')}
+            className="lg:hidden p-1 hover:bg-gray-100 rounded transition-colors cursor-pointer shrink-0"
+            aria-label="목록으로"
+          >
+            <ChevronLeft className="w-6 h-6 text-gray-600" />
+          </button>
+          <h1 className="text-t03-sb lg:text-t01-sb text-gray-900 truncate">{title}</h1>
+          <div className="hidden lg:flex items-center gap-6 shrink-0">
             <div className="flex items-center gap-2 text-c01-r justify-center">
               <span className="text-gray-600">경기날짜</span>
               <span className="text-gray-800">{matchDate}</span>

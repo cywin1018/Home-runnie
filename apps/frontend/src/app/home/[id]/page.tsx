@@ -172,84 +172,88 @@ export default function RecruitmentPostDetailPage() {
   );
 
   return (
-    <div className="py-10">
+    <div className="py-6 lg:py-10">
       <div>
         <p className="mb-2 text-b02-sb text-gray-600">제목</p>
-        <div className="mb-10 flex items-start justify-between gap-4">
-          <h1 className="text-t00 font-bold leading-tight text-gray-900">{data.title}</h1>
-          <p className="inline-flex shrink-0 items-center gap-2 text-b02-sb text-gray-700">
+        <div className="mb-8 lg:mb-10 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 lg:gap-4">
+          <h1 className="text-t02-b lg:text-t00 font-bold leading-tight text-gray-900 break-words">
+            {data.title}
+          </h1>
+          <p className="inline-flex shrink-0 items-center gap-2 text-b03-sb lg:text-b02-sb text-gray-700">
             <Image src="/icons/profile.svg" alt="" width={20} height={20} aria-hidden />
             {data.authorNickname ?? '작성자'}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <section className="relative h-80 rounded-[20px] bg-neutral-50 p-[30px] shadow-[0_10.3px_20.6px_rgba(0,0,0,0.03)]">
-            <h2 className="text-t03-sb text-stone-950">경기 정보</h2>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <section className="relative rounded-[20px] bg-neutral-50 p-5 lg:h-80 lg:p-[30px] shadow-[0_10.3px_20.6px_rgba(0,0,0,0.03)]">
+            <h2 className="text-t04-sb lg:text-t03-sb text-stone-950">경기 정보</h2>
 
-            <div className="mt-7 grid grid-cols-[1fr_1.4fr] gap-8">
-              <div className="space-y-7">
+            <div className="mt-5 lg:mt-7 grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-6 lg:gap-8">
+              <div className="space-y-5 lg:space-y-7">
                 <div>
-                  <p className="mb-3 inline-flex items-center gap-3 text-lg text-zinc-700">
-                    <Image src="/icons/calendar.svg" alt="" width={28} height={28} aria-hidden />
+                  <p className="mb-2 lg:mb-3 inline-flex items-center gap-2 lg:gap-3 text-b02-r lg:text-lg text-zinc-700">
+                    <Image src="/icons/calendar.svg" alt="" width={24} height={24} aria-hidden />
                     경기 날짜
                   </p>
-                  <p className="text-lg text-stone-950">{formattedDate}</p>
+                  <p className="text-b02-r lg:text-lg text-stone-950">{formattedDate}</p>
                 </div>
 
                 <div>
-                  <p className="mb-3 inline-flex items-center gap-3 text-lg text-zinc-700">
-                    <Image src="/icons/stadium.svg" alt="" width={28} height={28} aria-hidden />
+                  <p className="mb-2 lg:mb-3 inline-flex items-center gap-2 lg:gap-3 text-b02-r lg:text-lg text-zinc-700">
+                    <Image src="/icons/stadium.svg" alt="" width={24} height={24} aria-hidden />
                     경기 구장
                   </p>
-                  <p className="text-lg text-stone-950">{stadiumLabel ?? data.stadium}</p>
+                  <p className="text-b02-r lg:text-lg text-stone-950">
+                    {stadiumLabel ?? data.stadium}
+                  </p>
                 </div>
               </div>
 
               <div>
-                <p className="mb-3 inline-flex items-center gap-3 text-lg text-zinc-700">
-                  <Image src="/icons/team.svg" alt="" width={28} height={28} aria-hidden />
+                <p className="mb-2 lg:mb-3 inline-flex items-center gap-2 lg:gap-3 text-b02-r lg:text-lg text-zinc-700">
+                  <Image src="/icons/team.svg" alt="" width={24} height={24} aria-hidden />
                   경기하는 팀
                 </p>
-                <div className="mt-2 flex items-center justify-between gap-5">
+                <div className="mt-2 flex items-center justify-between gap-3 lg:gap-5">
                   <TeamLogoCard team={homeTeam} />
-                  <p className="text-lg font-bold text-stone-950">VS</p>
+                  <p className="text-b01-b lg:text-lg font-bold text-stone-950">VS</p>
                   <TeamLogoCard team={awayTeam} />
                 </div>
               </div>
             </div>
           </section>
 
-          <section className="relative h-80 rounded-[20px] bg-neutral-50 p-10 shadow-[0_10.3px_20.6px_rgba(0,0,0,0.03)]">
-            <h2 className="text-t03-sb text-stone-950">모집 정보</h2>
+          <section className="relative rounded-[20px] bg-neutral-50 p-5 lg:h-80 lg:p-10 shadow-[0_10.3px_20.6px_rgba(0,0,0,0.03)]">
+            <h2 className="text-t04-sb lg:text-t03-sb text-stone-950">모집 정보</h2>
 
-            <div className="mt-10 grid grid-cols-2 gap-8">
+            <div className="mt-6 lg:mt-10 grid grid-cols-2 gap-6 lg:gap-8">
               <div>
-                <p className="mb-3 inline-flex items-center gap-3 text-lg text-zinc-700">
-                  <Image src="/icons/memberHope.svg" alt="" width={28} height={28} aria-hidden />
+                <p className="mb-2 lg:mb-3 inline-flex items-center gap-2 lg:gap-3 text-b02-r lg:text-lg text-zinc-700">
+                  <Image src="/icons/memberHope.svg" alt="" width={24} height={24} aria-hidden />
                   모집 인원
                 </p>
-                <p className="text-xl font-semibold text-stone-950">
+                <p className="text-b01-sb lg:text-xl font-semibold text-stone-950">
                   {String(data.recruitmentLimit).padStart(2, '0')}
-                  <span className="ml-1 text-lg font-normal">명</span>
+                  <span className="ml-1 text-b02-r lg:text-lg font-normal">명</span>
                 </p>
               </div>
 
               <div>
-                <p className="mb-3 inline-flex items-center gap-3 text-lg text-zinc-700">
-                  <Image src="/icons/memberReal.svg" alt="" width={28} height={28} aria-hidden />
+                <p className="mb-2 lg:mb-3 inline-flex items-center gap-2 lg:gap-3 text-b02-r lg:text-lg text-zinc-700">
+                  <Image src="/icons/memberReal.svg" alt="" width={24} height={24} aria-hidden />
                   현재 모집된 인원
                 </p>
-                <p className="text-xl font-semibold text-stone-950">
+                <p className="text-b01-sb lg:text-xl font-semibold text-stone-950">
                   {String(data.currentParticipants).padStart(2, '0')}
-                  <span className="ml-1 text-lg font-normal">명</span>
+                  <span className="ml-1 text-b02-r lg:text-lg font-normal">명</span>
                 </p>
               </div>
             </div>
 
-            <div className="mt-10">
-              <p className="mb-3 inline-flex items-center gap-3 text-lg text-zinc-700">
-                <Image src="/icons/ticket.svg" alt="" width={28} height={28} aria-hidden />
+            <div className="mt-6 lg:mt-10">
+              <p className="mb-2 lg:mb-3 inline-flex items-center gap-2 lg:gap-3 text-b02-r lg:text-lg text-zinc-700">
+                <Image src="/icons/ticket.svg" alt="" width={24} height={24} aria-hidden />
                 티켓 현황
               </p>
               <p className="text-b02-r text-gray-900">{ticketingText ?? '미정'}</p>
@@ -257,37 +261,37 @@ export default function RecruitmentPostDetailPage() {
           </section>
         </div>
 
-        <section className="mt-6 h-80 rounded-[20px] bg-neutral-50 p-[30px] shadow-[0_10.3px_20.6px_rgba(0,0,0,0.03)]">
-          <h2 className="text-t03-sb text-stone-950">작성자 정보</h2>
-          <div className="mt-8 grid grid-cols-[220px_180px_1fr] gap-8">
+        <section className="mt-6 rounded-[20px] bg-neutral-50 p-5 lg:h-80 lg:p-[30px] shadow-[0_10.3px_20.6px_rgba(0,0,0,0.03)]">
+          <h2 className="text-t04-sb lg:text-t03-sb text-stone-950">작성자 정보</h2>
+          <div className="mt-6 lg:mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[220px_180px_1fr] gap-6 lg:gap-8">
             <div>
-              <p className="mb-4 inline-flex items-center gap-3 text-lg text-zinc-700">
-                <Image src="/icons/team.svg" alt="" width={28} height={28} aria-hidden />
+              <p className="mb-3 lg:mb-4 inline-flex items-center gap-2 lg:gap-3 text-b02-r lg:text-lg text-zinc-700">
+                <Image src="/icons/team.svg" alt="" width={24} height={24} aria-hidden />
                 응원하는 팀
               </p>
               <TeamLogoCard team={supportTeam} />
             </div>
 
             <div>
-              <p className="mb-4 inline-flex items-center gap-3 text-lg text-zinc-700">
-                <Image src="/icons/gender.svg" alt="" width={28} height={28} aria-hidden />
+              <p className="mb-3 lg:mb-4 inline-flex items-center gap-2 lg:gap-3 text-b02-r lg:text-lg text-zinc-700">
+                <Image src="/icons/gender.svg" alt="" width={24} height={24} aria-hidden />
                 작성자 성별
               </p>
-              <p className="text-lg text-stone-950">{genderText}</p>
+              <p className="text-b02-r lg:text-lg text-stone-950">{genderText}</p>
 
-              <p className="mb-4 mt-6 inline-flex items-center gap-3 text-lg text-zinc-700">
-                <Image src="/icons/gender.svg" alt="" width={28} height={28} aria-hidden />
+              <p className="mb-3 lg:mb-4 mt-5 lg:mt-6 inline-flex items-center gap-2 lg:gap-3 text-b02-r lg:text-lg text-zinc-700">
+                <Image src="/icons/gender.svg" alt="" width={24} height={24} aria-hidden />
                 선호하는 성별
               </p>
-              <p className="text-lg text-stone-950">{preferGenderText}</p>
+              <p className="text-b02-r lg:text-lg text-stone-950">{preferGenderText}</p>
             </div>
 
-            <div>
-              <p className="mb-4 inline-flex items-center gap-3 text-lg text-zinc-700">
-                <Image src="/icons/writer.svg" alt="" width={28} height={28} aria-hidden />
+            <div className="sm:col-span-2 lg:col-span-1">
+              <p className="mb-3 lg:mb-4 inline-flex items-center gap-2 lg:gap-3 text-b02-r lg:text-lg text-zinc-700">
+                <Image src="/icons/writer.svg" alt="" width={24} height={24} aria-hidden />
                 작성자 성향
               </p>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2 lg:gap-3">
                 {writerTraits.map((trait) => (
                   <BgmTag key={trait} text={trait} size="sm" />
                 ))}
@@ -297,23 +301,23 @@ export default function RecruitmentPostDetailPage() {
           </div>
         </section>
 
-        <section className="mt-6 rounded-[20px] bg-white p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
-          <h2 className="mb-4 text-t03-sb text-gray-900">하고 싶은 말</h2>
+        <section className="mt-6 rounded-[20px] bg-white p-5 lg:p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
+          <h2 className="mb-3 lg:mb-4 text-t04-sb lg:text-t03-sb text-gray-900">하고 싶은 말</h2>
           <p className="text-b02-r whitespace-pre-wrap text-gray-700">{data.message || '-'}</p>
         </section>
 
-        <section className="mt-10">
+        <section className="mt-8 lg:mt-10">
           {isAuthor ? (
             <>
               <div className="mb-3 flex justify-end">
                 <p className="text-b02-sb text-gray-900">상태</p>
               </div>
-              <div className="flex justify-end gap-3">
+              <div className="flex flex-col sm:flex-row sm:justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => updatePostStatus({ postStatus: 'ACTIVE' })}
                   disabled={isUpdatingStatus}
-                  className={`h-16 w-64 rounded-2xl text-lg font-semibold ${
+                  className={`h-14 lg:h-16 w-full sm:w-48 lg:w-64 rounded-2xl text-b01-sb lg:text-lg font-semibold ${
                     isRecruiting ? 'bg-black text-white' : 'bg-zinc-200 text-zinc-400'
                   }`}
                 >
@@ -323,7 +327,7 @@ export default function RecruitmentPostDetailPage() {
                   type="button"
                   onClick={() => updatePostStatus({ postStatus: 'CLOSE' })}
                   disabled={isUpdatingStatus}
-                  className={`h-16 w-64 rounded-2xl text-lg font-semibold ${
+                  className={`h-14 lg:h-16 w-full sm:w-48 lg:w-64 rounded-2xl text-b01-sb lg:text-lg font-semibold ${
                     isRecruiting ? 'bg-zinc-200 text-zinc-400' : 'bg-black text-white'
                   }`}
                 >
@@ -332,17 +336,17 @@ export default function RecruitmentPostDetailPage() {
               </div>
             </>
           ) : (
-            <div className="flex justify-end">
+            <div className="flex justify-center lg:justify-end">
               <button
                 type="button"
                 disabled={!isRecruiting || isApplying}
                 onClick={handleApply}
-                className={`inline-flex h-16 w-[460px] items-center justify-center gap-2.5 rounded-2xl px-44 py-5 cursor-pointer ${
+                className={`inline-flex h-14 lg:h-16 w-full lg:w-[460px] items-center justify-center rounded-2xl px-5 py-4 lg:py-5 cursor-pointer ${
                   isRecruiting && !isApplying ? 'bg-stone-950' : 'bg-zinc-200'
                 }`}
               >
                 <span
-                  className={`text-lg font-semibold leading-7 ${
+                  className={`text-b01-sb lg:text-lg font-semibold leading-7 ${
                     isRecruiting && !isApplying ? 'text-white' : 'text-zinc-400'
                   }`}
                 >
@@ -353,12 +357,12 @@ export default function RecruitmentPostDetailPage() {
           )}
         </section>
 
-        <section className="mt-16">
+        <section className="mt-12 lg:mt-16">
           <div className="mb-4 flex items-end justify-between">
-            <h2 className="text-2xl font-bold text-gray-900">댓글</h2>
+            <h2 className="text-t03-b lg:text-2xl font-bold text-gray-900">댓글</h2>
             <button
               type="button"
-              className="inline-flex items-center gap-2 text-sm text-zinc-500"
+              className="inline-flex items-center gap-2 text-b03-r text-zinc-500"
               onClick={() => setIsReportModalOpen(true)}
             >
               <Image src="/icons/alert.svg" alt="" width={16} height={16} aria-hidden />
@@ -366,9 +370,9 @@ export default function RecruitmentPostDetailPage() {
             </button>
           </div>
 
-          <div className="mb-4 flex gap-3">
+          <div className="mb-4 flex flex-col sm:flex-row gap-3">
             <input
-              className="h-14 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-5 text-base outline-none"
+              className="h-12 lg:h-14 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-5 text-b02-r outline-none"
               placeholder="자유롭게 댓글을 작성해주세요"
               value={commentInput}
               onChange={(e) => setCommentInput(e.target.value)}
@@ -381,20 +385,18 @@ export default function RecruitmentPostDetailPage() {
             />
             <button
               type="button"
-              className={`inline-flex h-14 w-32 items-center justify-center gap-2.5 rounded-[10px] px-3.5 py-2.5 ${
+              className={`inline-flex h-12 lg:h-14 w-full sm:w-32 items-center justify-center gap-2.5 rounded-[10px] px-3.5 py-2.5 ${
                 canSubmitComment ? 'bg-stone-950' : 'bg-zinc-200'
               }`}
               onClick={handleSubmitComment}
               disabled={!canSubmitComment}
             >
-              <span className="inline-flex items-center justify-start gap-1">
-                <span
-                  className={`text-lg font-normal leading-7 ${
-                    canSubmitComment ? 'text-white' : 'text-neutral-400'
-                  }`}
-                >
-                  완료
-                </span>
+              <span
+                className={`text-b01-m lg:text-lg leading-7 ${
+                  canSubmitComment ? 'text-white' : 'text-neutral-400'
+                }`}
+              >
+                완료
               </span>
             </button>
           </div>
@@ -403,13 +405,28 @@ export default function RecruitmentPostDetailPage() {
             {comments.map((comment, index) => (
               <div
                 key={comment.id}
-                className={` px-5 py-5 outline-1 -outline-offset-1 outline-zinc-200 ${
+                className={`px-4 lg:px-5 py-4 lg:py-5 outline-1 -outline-offset-1 outline-zinc-200 ${
                   index === 0 ? 'rounded-tl-2xl rounded-tr-2xl' : ''
                 } ${index === comments.length - 1 ? 'rounded-bl-2xl rounded-br-2xl' : ''}`}
               >
-                <div className="flex items-end justify-between gap-4">
-                  <p className="text-lg leading-7 text-black">{comment.content}</p>
-                  <div className="relative">
+                <div className="flex items-center gap-2 mb-2">
+                  <Image
+                    src="/icons/profile.svg"
+                    alt=""
+                    width={20}
+                    height={20}
+                    aria-hidden
+                    className="shrink-0"
+                  />
+                  <p className="text-b03-sb lg:text-b02-sb text-gray-800 truncate">
+                    {comment.authorNickname ?? '익명'}
+                  </p>
+                </div>
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-b02-r lg:text-lg leading-6 lg:leading-7 text-black wrap-break-word flex-1 min-w-0">
+                    {comment.content}
+                  </p>
+                  <div className="relative shrink-0">
                     <button
                       type="button"
                       className="text-zinc-400"
@@ -428,9 +445,7 @@ export default function RecruitmentPostDetailPage() {
                           setIsReportModalOpen(true);
                         }}
                       >
-                        <span className="text-sm font-normal leading-5 text-zinc-900">
-                          신고하기
-                        </span>
+                        <span className="text-b03-r text-zinc-900">신고하기</span>
                       </button>
                     ) : null}
                   </div>
@@ -438,7 +453,7 @@ export default function RecruitmentPostDetailPage() {
               </div>
             ))}
             {comments.length === 0 ? (
-              <div className="px-5 py-5 text-sm text-zinc-500">아직 댓글이 없습니다.</div>
+              <div className="px-5 py-5 text-b03-r text-zinc-500">아직 댓글이 없습니다.</div>
             ) : null}
           </div>
         </section>

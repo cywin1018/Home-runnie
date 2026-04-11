@@ -101,7 +101,7 @@ const ChatBox = ({ roomId }: { roomId: string }) => {
         />
         <section
           className={`flex flex-col flex-1 min-h-0 py-6 transition-all duration-300 ease-in-out ${
-            isSidebarOpen ? 'px-[30px]' : 'px-[120px]'
+            isSidebarOpen ? 'px-4 lg:px-[30px]' : 'px-4 lg:px-[120px]'
           }`}
         >
           <ReportModal
