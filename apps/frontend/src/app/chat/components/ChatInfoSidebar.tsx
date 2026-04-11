@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { User, Check } from 'lucide-react';
+import { useState } from 'react';
+import { User, Check, X } from 'lucide-react';
 import { ChatRoomMemberRole, ChatRoomMemberResponse } from '@homerunnie/shared';
-import { getChatRoomMembers, kickMember, deleteChatRoom } from '@/apis/chat/chat';
+import { kickMember, deleteChatRoom } from '@/apis/chat/chat';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
+import { useChatRoomMembersQuery, chatKeys } from '@/hooks/chat/useChatQuery';
 import {
   Dialog,
   DialogContent,
@@ -35,26 +37,14 @@ const ChatInfoSidebar = ({
   roomId,
 }: ChatInfoSidebarProps) => {
   const router = useRouter();
-  const [members, setMembers] = useState<ChatRoomMemberResponse[]>([]);
+  const queryClient = useQueryClient();
+  const { data: members = [] } = useChatRoomMembersQuery(Number(roomId), isOpen);
+
   const [selectedMemberIds, setSelectedMemberIds] = useState<Set<number>>(new Set());
   const [kickTargets, setKickTargets] = useState<ChatRoomMemberResponse[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isKickMode, setIsKickMode] = useState(false);
   const isHost = role === ChatRoomMemberRole.HOST;
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const fetchMembers = async () => {
-      try {
-        const data = await getChatRoomMembers(Number(roomId));
-        setMembers(data);
-      } catch (error) {
-        console.error('멤버 목록 조회 실패:', error);
-      }
-    };
-    fetchMembers();
-  }, [isOpen, roomId]);
 
   const toggleMemberSelection = (memberId: number) => {
     setSelectedMemberIds((prev) => {
@@ -86,12 +76,11 @@ const ChatInfoSidebar = ({
   const handleKickConfirm = async () => {
     if (kickTargets.length === 0) return;
     try {
-      const kickedIds = new Set<number>();
       for (const target of kickTargets) {
         await kickMember(Number(roomId), target.memberId);
-        kickedIds.add(target.memberId);
       }
-      setMembers((prev) => prev.filter((m) => !kickedIds.has(m.memberId)));
+      // 캐시 무효화하여 멤버 목록 갱신
+      queryClient.invalidateQueries({ queryKey: chatKeys.roomMembers(Number(roomId)) });
       setSelectedMemberIds(new Set());
       setKickTargets([]);
       setIsKickMode(false);
@@ -120,14 +109,29 @@ const ChatInfoSidebar = ({
 
   return (
     <>
+      {/* 모바일 배경 딤 */}
       <div
-        className={`h-full bg-white border-l border-gray-200 shadow-lg shrink-0 transition-all duration-300 ease-in-out overflow-hidden ${
-          isOpen ? 'w-96' : 'w-0 border-0'
+        onClick={onClose}
+        className={`lg:hidden fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 ${
+          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      />
+      <div
+        className={`bg-white border-l border-gray-200 shadow-lg transition-all duration-300 ease-in-out overflow-hidden lg:h-full lg:shrink-0 max-lg:fixed max-lg:right-0 max-lg:top-0 max-lg:bottom-0 max-lg:z-50 max-lg:w-full sm:max-lg:w-96 ${
+          isOpen ? 'lg:w-96 max-lg:translate-x-0' : 'lg:w-0 lg:border-0 max-lg:translate-x-full'
         }`}
       >
         <div className="flex flex-col h-full">
-          <div className="flex items-center px-[20px] py-[16px] border-b border-gray-200">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
             <h2 className="text-t01-sb">상세정보</h2>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="상세정보 닫기"
+              className="lg:hidden p-1 hover:bg-gray-100 rounded transition-colors cursor-pointer"
+            >
+              <X className="w-6 h-6 text-gray-600" />
+            </button>
           </div>
 
           <div className="flex-1 overflow-y-auto">

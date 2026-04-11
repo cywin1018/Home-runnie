@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { useEffect, useState, useCallback } from 'react';
+import { useChatSocket } from './ChatSocketProvider';
 
 const SYSTEM_PREFIX = '[SYSTEM]';
 
@@ -13,104 +13,90 @@ export interface ChatMessage {
   supportTeam: string | null;
 }
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
-
 export function useSocket(roomId: string) {
-  const socketRef = useRef<Socket | null>(null);
+  const { socket, connected } = useChatSocket();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [connected, setConnected] = useState(false);
   const [joinRequestCount, setJoinRequestCount] = useState(0);
   const [kickedFromRoom, setKickedFromRoom] = useState(false);
   const [roomDeleted, setRoomDeleted] = useState(false);
 
   useEffect(() => {
-    const socket = io(`${BACKEND_URL}/chat`, {
-      withCredentials: true,
-    });
-    socketRef.current = socket;
+    if (!socket || !connected) return;
 
-    socket.on('authenticated', () => {
-      setConnected(true);
-      socket.emit('join_room', { roomId });
-    });
+    // 방 입장 (message_history 수신을 위해)
+    socket.emit('join_room', { roomId });
 
-    socket.on(
-      'message_history',
-      (
-        history: {
-          id: number;
-          message: string;
-          isOwn: boolean;
-          nickname: string;
-          supportTeam: string | null;
-          createdAt: string;
-        }[],
-      ) => {
-        setMessages(
-          history.map((msg) => {
-            const isSystem = msg.message.startsWith(SYSTEM_PREFIX);
-            return {
-              id: msg.id,
-              text: isSystem ? msg.message.slice(SYSTEM_PREFIX.length) : msg.message,
-              sender: isSystem ? ('system' as const) : msg.isOwn ? 'me' : ('other' as const),
-              nickname: isSystem ? '' : msg.isOwn ? '' : msg.nickname,
-              supportTeam: isSystem ? null : msg.supportTeam,
-            };
-          }),
-        );
-      },
-    );
-
-    socket.on(
-      'received_message',
-      (data: {
-        nickname: string;
+    const handleHistory = (
+      history: {
+        id: number;
         message: string;
         isOwn: boolean;
-        supportTeam?: string | null;
-      }) => {
-        const isSystem = data.message.startsWith(SYSTEM_PREFIX);
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now(),
-            text: isSystem ? data.message.slice(SYSTEM_PREFIX.length) : data.message,
-            sender: isSystem ? 'system' : data.isOwn ? 'me' : 'other',
-            nickname: isSystem ? '' : data.nickname,
-            supportTeam: isSystem ? null : (data.supportTeam ?? null),
-          },
-        ]);
-      },
-    );
+        nickname: string;
+        supportTeam: string | null;
+        createdAt: string;
+      }[],
+    ) => {
+      setMessages(
+        history.map((msg) => {
+          const isSystem = msg.message.startsWith(SYSTEM_PREFIX);
+          return {
+            id: msg.id,
+            text: isSystem ? msg.message.slice(SYSTEM_PREFIX.length) : msg.message,
+            sender: isSystem ? ('system' as const) : msg.isOwn ? 'me' : ('other' as const),
+            nickname: isSystem ? '' : msg.isOwn ? '' : msg.nickname,
+            supportTeam: isSystem ? null : msg.supportTeam,
+          };
+        }),
+      );
+    };
 
-    socket.on('join_request_received', () => {
-      setJoinRequestCount((prev) => prev + 1);
-    });
+    const handleMessage = (data: {
+      nickname: string;
+      message: string;
+      isOwn: boolean;
+      supportTeam?: string | null;
+      roomId?: string;
+    }) => {
+      // 다른 방의 메시지는 무시 (공유 소켓이므로 모든 방의 메시지가 수신됨)
+      if (data.roomId && data.roomId !== roomId) return;
 
-    socket.on('member_joined', () => {
-      // 시스템 메시지는 백엔드에서 저장 후 received_message로 전달됨
-    });
+      const isSystem = data.message.startsWith(SYSTEM_PREFIX);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          text: isSystem ? data.message.slice(SYSTEM_PREFIX.length) : data.message,
+          sender: isSystem ? 'system' : data.isOwn ? 'me' : 'other',
+          nickname: isSystem ? '' : data.nickname,
+          supportTeam: isSystem ? null : (data.supportTeam ?? null),
+        },
+      ]);
+    };
 
-    socket.on('member_kicked', () => {
-      setKickedFromRoom(true);
-    });
+    const handleJoinRequest = () => setJoinRequestCount((prev) => prev + 1);
+    const handleKicked = () => setKickedFromRoom(true);
+    const handleDeleted = () => setRoomDeleted(true);
 
-    socket.on('room_deleted', () => {
-      setRoomDeleted(true);
-    });
-
-    socket.on('disconnect', () => setConnected(false));
+    socket.on('message_history', handleHistory);
+    socket.on('received_message', handleMessage);
+    socket.on('join_request_received', handleJoinRequest);
+    socket.on('member_kicked', handleKicked);
+    socket.on('room_deleted', handleDeleted);
 
     return () => {
-      socket.disconnect();
+      socket.off('message_history', handleHistory);
+      socket.off('received_message', handleMessage);
+      socket.off('join_request_received', handleJoinRequest);
+      socket.off('member_kicked', handleKicked);
+      socket.off('room_deleted', handleDeleted);
     };
-  }, [roomId]);
+  }, [socket, connected, roomId]);
 
   const sendMessage = useCallback(
     (text: string) => {
-      socketRef.current?.emit('message', { roomId, message: text });
+      socket?.emit('message', { roomId, message: text });
     },
-    [roomId],
+    [socket, roomId],
   );
 
   const resetJoinRequestCount = useCallback(() => {

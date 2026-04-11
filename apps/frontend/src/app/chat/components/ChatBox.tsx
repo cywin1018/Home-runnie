@@ -1,35 +1,22 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import ChatInfo from './ChatInfo';
 import ChatInput from './ChatInput';
-import ChatReport from './ChatReport';
+import MessageBubble from './MessageBubble';
 import ChatInfoSidebar from './ChatInfoSidebar';
+import ReportModal, { ReportParticipant } from '@/shared/ui/modal/ReportModal';
 import { useChatRooms } from '@/stores/ChatRoomsContext';
-import { getMyChatRooms, getChatRoomMembers } from '@/apis/chat/chat';
-import {
-  ChatRoomResponse,
-  ChatRoomMemberRole,
-  TeamDescription,
-  Team,
-  TEAM_ASSETS,
-  DEFAULT_PROFILE_IMAGE,
-} from '@homerunnie/shared';
-import { useState } from 'react';
+import { ChatRoomResponse, ChatRoomMemberRole, TeamDescription, Team } from '@homerunnie/shared';
 import { useSocket } from '@/hooks/chat/useSocket';
-import { ReportParticipant } from '@/shared/ui/modal/ReportModal';
+import { useChatRoomMembersQuery } from '@/hooks/chat/useChatQuery';
 
 interface RoomInfo {
   title: string;
   matchDate: string;
   matchTeam: string;
   role: ChatRoomMemberRole;
-}
-
-interface RoomData {
-  info: RoomInfo;
 }
 
 const formatKoreanDate = (date: Date): string => {
@@ -48,28 +35,29 @@ const formatTeamName = (team: string | null): string => {
   return TeamDescription[team as Team] ?? team;
 };
 
-const createRoomData = (room: ChatRoomResponse): RoomData => {
-  return {
-    info: {
-      title: room.postTitle,
-      matchDate: room.gameDate ? formatKoreanDate(new Date(room.gameDate)) : '-',
-      matchTeam:
-        room.teamHome && room.teamAway
-          ? `${formatTeamName(room.teamHome)} vs ${formatTeamName(room.teamAway)}`
-          : '-',
-      role: room.role,
-    },
-  };
+const createRoomInfo = (room: ChatRoomResponse): RoomInfo => ({
+  title: room.postTitle,
+  matchDate: room.gameDate ? formatKoreanDate(new Date(room.gameDate)) : '-',
+  matchTeam:
+    room.teamHome && room.teamAway
+      ? `${formatTeamName(room.teamHome)} vs ${formatTeamName(room.teamAway)}`
+      : '-',
+  role: room.role,
+});
+
+const FALLBACK_ROOM_INFO: RoomInfo = {
+  title: '알 수 없는 방',
+  matchDate: '-',
+  matchTeam: '-',
+  role: ChatRoomMemberRole.MEMBER,
 };
 
 const ChatBox = ({ roomId }: { roomId: string }) => {
   const router = useRouter();
   const chatRoomsMap = useChatRooms();
-  const [roomData, setRoomData] = useState<RoomData | null>(null);
-  const [loading, setLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-  const [reportParticipants, setReportParticipants] = useState<ReportParticipant[]>([]);
+
   const {
     messages,
     sendMessage,
@@ -80,6 +68,16 @@ const ChatBox = ({ roomId }: { roomId: string }) => {
     roomDeleted,
   } = useSocket(roomId);
 
+  const { data: members = [] } = useChatRoomMembersQuery(Number(roomId));
+
+  const reportParticipants: ReportParticipant[] = members.map((m) => ({
+    memberId: m.memberId,
+    nickname: m.nickname,
+  }));
+
+  const roomResponse = chatRoomsMap.get(roomId);
+  const roomInfo = roomResponse ? createRoomInfo(roomResponse) : FALLBACK_ROOM_INFO;
+
   useEffect(() => {
     if (kickedFromRoom || roomDeleted) {
       alert(kickedFromRoom ? '채팅방에서 강퇴되었습니다.' : '채팅방이 삭제되었습니다.');
@@ -87,159 +85,36 @@ const ChatBox = ({ roomId }: { roomId: string }) => {
     }
   }, [kickedFromRoom, roomDeleted, router]);
 
-  // 채팅방 멤버 목록 조회
-  useEffect(() => {
-    const fetchMembers = async () => {
-      try {
-        const members = await getChatRoomMembers(Number(roomId));
-        setReportParticipants(members.map((m) => ({ memberId: m.memberId, nickname: m.nickname })));
-      } catch (error) {
-        console.error('멤버 목록 조회 실패:', error);
-      }
-    };
-    fetchMembers();
-  }, [roomId]);
-
-  // 채팅방 정보를 API에서 가져오기
-  useEffect(() => {
-    const fetchRoomData = async () => {
-      // Context에서 채팅방 정보 찾기
-      const roomInfo = chatRoomsMap.get(roomId);
-      if (roomInfo) {
-        setRoomData(createRoomData(roomInfo));
-        return;
-      }
-
-      // Context에 없으면 API로 채팅방 목록 조회해서 찾기
-      setLoading(true);
-      try {
-        const response = await getMyChatRooms(1, 100);
-        const foundRoom = response.data.find((room) => String(room.id) === roomId);
-
-        if (foundRoom) {
-          setRoomData(createRoomData(foundRoom));
-        } else {
-          setRoomData({
-            info: {
-              title: '알 수 없는 방',
-
-              matchDate: '-',
-              matchTeam: '-',
-              role: ChatRoomMemberRole.MEMBER,
-            },
-          });
-        }
-      } catch (error) {
-        console.error('채팅방 정보 조회 실패:', error);
-        setRoomData({
-          info: {
-            title: '알 수 없는 방',
-            matchDate: '-',
-            matchTeam: '-',
-            role: ChatRoomMemberRole.MEMBER,
-          },
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRoomData();
-  }, [roomId, chatRoomsMap]);
-
-  if (loading) {
-    return (
-      <div className="flex h-full w-full items-center justify-center">
-        <p className="text-gray-400">로딩 중...</p>
-      </div>
-    );
-  }
-
-  if (!roomData) {
-    return (
-      <div className="flex h-full w-full items-center justify-center">
-        <p className="text-gray-400">채팅방 정보를 불러오는 중...</p>
-      </div>
-    );
-  }
-
-  const currentRoomData = roomData;
-
   return (
     <div className="flex flex-row h-full w-full bg-gray-100 relative">
-      {/* 채팅 영역 */}
       <div className="flex flex-col h-full flex-1 min-w-0 transition-all duration-300 ease-in-out">
         <ChatInfo
-          title={currentRoomData.info.title}
-          matchDate={currentRoomData.info.matchDate}
-          matchTeam={currentRoomData.info.matchTeam}
+          title={roomInfo.title}
+          matchDate={roomInfo.matchDate}
+          matchTeam={roomInfo.matchTeam}
           onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
           isSidebarOpen={isSidebarOpen}
-          role={currentRoomData.info.role}
+          role={roomInfo.role}
           roomId={roomId}
           joinRequestCount={joinRequestCount}
           onJoinRequestOpen={resetJoinRequestCount}
         />
         <section
           className={`flex flex-col flex-1 min-h-0 py-6 transition-all duration-300 ease-in-out ${
-            isSidebarOpen ? 'px-[30px]' : 'px-[120px]'
+            isSidebarOpen ? 'px-4 lg:px-[30px]' : 'px-4 lg:px-[120px]'
           }`}
         >
-          <ChatReport
-            isModalOpen={isReportModalOpen}
-            onOpenModal={() => setIsReportModalOpen(true)}
-            onCloseModal={() => setIsReportModalOpen(false)}
+          <ReportModal
+            isOpen={isReportModalOpen}
+            onClose={() => setIsReportModalOpen(false)}
             participants={reportParticipants}
           />
 
           <div className="grow flex flex-col justify-end gap-4 overflow-y-auto min-h-0 mb-6">
             {!connected && <p className="text-center text-sm text-gray-400">서버에 연결 중...</p>}
-            {messages.map((msg) =>
-              msg.sender === 'system' ? (
-                <div key={msg.id} className="flex justify-center">
-                  <p className="text-xs text-gray-400 bg-gray-200 rounded-full px-3 py-1">
-                    {msg.text}
-                  </p>
-                </div>
-              ) : (
-                <div
-                  key={msg.id}
-                  className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div>
-                    {msg.sender === 'other' && msg.nickname && (
-                      <p className="text-sm text-gray-500 mb-1">{msg.nickname}</p>
-                    )}
-                    <div className="flex items-end gap-2">
-                      {msg.sender === 'other' && msg.nickname && (
-                        <div className="w-8 h-8 rounded-full overflow-hidden shrink-0">
-                          <Image
-                            src={
-                              (msg.supportTeam && TEAM_ASSETS[msg.supportTeam as Team]?.image) ||
-                              DEFAULT_PROFILE_IMAGE
-                            }
-                            alt={msg.nickname}
-                            width={32}
-                            height={32}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      )}
-                      <div
-                        className={[
-                          'rounded-2xl px-4 py-2 max-w-xs lg:max-w-md',
-                          msg.sender === 'me'
-                            ? 'bg-green-500 text-white rounded-br-none'
-                            : 'bg-white text-black rounded-bl-none',
-                        ].join(' ')}
-                      >
-                        {msg.text}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ),
-            )}
+            {messages.map((msg) => (
+              <MessageBubble key={msg.id} msg={msg} />
+            ))}
           </div>
 
           <div className="shrink-0">
@@ -248,15 +123,14 @@ const ChatBox = ({ roomId }: { roomId: string }) => {
         </section>
       </div>
 
-      {/* 사이드바 */}
       <ChatInfoSidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
         onReport={() => setIsReportModalOpen(true)}
-        title={currentRoomData.info.title}
-        matchDate={currentRoomData.info.matchDate}
-        matchTeam={currentRoomData.info.matchTeam}
-        role={currentRoomData.info.role}
+        title={roomInfo.title}
+        matchDate={roomInfo.matchDate}
+        matchTeam={roomInfo.matchTeam}
+        role={roomInfo.role}
         roomId={roomId}
       />
     </div>

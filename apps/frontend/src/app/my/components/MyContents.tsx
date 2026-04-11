@@ -47,33 +47,33 @@ export default function MyContents() {
   const totalPage = result?.data?.totalPage ?? 1;
 
   return (
-    <div className="flex flex-col rounded-[20px] border py-[30px] px-[6px] gap-[10px] bg-white shadow-md w-full mb-10">
+    <div className="flex flex-col rounded-[20px] border py-5 lg:py-[30px] px-3 lg:px-[6px] gap-[10px] bg-white shadow-md w-full mb-10">
       <div
-        className={`flex flex-row gap-3 py-[4px] px-[30px] hover:bg-gray-50 cursor-pointer rounded-lg ${selected === 'scrapped' ? 'bg-gray-100' : ''}`}
+        className={`flex flex-row gap-3 py-1 px-4 lg:px-[30px] hover:bg-gray-50 cursor-pointer rounded-lg ${selected === 'scrapped' ? 'bg-gray-100' : ''}`}
         onClick={() => handleSelect('scrapped')}
       >
         <Image src="/icons/bookmark.svg" alt="스크랩 한 모집글" width={30} height={30} />
-        <p className="font-weight-m text-b01 leading-150">스크랩 한 모집글</p>
+        <p className="font-weight-m text-b02-r lg:text-b01 leading-150">스크랩 한 모집글</p>
       </div>
 
       <div
-        className={`flex flex-row gap-3 py-[4px] px-[30px] hover:bg-gray-50 cursor-pointer rounded-lg ${selected === 'written' ? 'bg-gray-100' : ''}`}
+        className={`flex flex-row gap-3 py-1 px-4 lg:px-[30px] hover:bg-gray-50 cursor-pointer rounded-lg ${selected === 'written' ? 'bg-gray-100' : ''}`}
         onClick={() => handleSelect('written')}
       >
         <Image src="/icons/pen.svg" alt="내가 작성한 모집글" width={30} height={30} />
-        <p className="font-weight-m text-b01 leading-150">내가 작성한 모집글</p>
+        <p className="font-weight-m text-b02-r lg:text-b01 leading-150">내가 작성한 모집글</p>
       </div>
 
       <div
-        className={`flex flex-row gap-3 py-[4px] px-[30px] hover:bg-gray-50 cursor-pointer rounded-lg ${selected === 'participated' ? 'bg-gray-100' : ''}`}
+        className={`flex flex-row gap-3 py-1 px-4 lg:px-[30px] hover:bg-gray-50 cursor-pointer rounded-lg ${selected === 'participated' ? 'bg-gray-100' : ''}`}
         onClick={() => handleSelect('participated')}
       >
         <Image src="/images/default.png" alt="내가 참여한 글" width={30} height={30} />
-        <p className="font-weight-m text-b01 leading-150">내가 참여한 글</p>
+        <p className="font-weight-m text-b02-r lg:text-b01 leading-150">내가 참여한 글</p>
       </div>
 
       {selected && (
-        <div className="mt-2 px-[24px]">
+        <div className="mt-2 px-3 lg:px-6">
           {result?.isLoading && (
             <p className="text-gray-500 text-b02-r py-4 text-center">불러오는 중...</p>
           )}
@@ -89,16 +89,16 @@ export default function MyContents() {
                   <Link
                     key={item.number}
                     href={`/home/${item.number}`}
-                    className="flex justify-between items-center py-3 px-2 hover:bg-gray-50 rounded-lg"
+                    className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-3 px-2 hover:bg-gray-50 rounded-lg gap-1 sm:gap-4"
                   >
-                    <div className="flex items-center gap-4">
-                      <span className="text-b02-r text-gray-500 w-[100px] truncate">
+                    <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+                      <span className="text-b03-r lg:text-b02-r text-gray-500 shrink-0">
                         {item.gameTeams}
                       </span>
-                      <span className="text-b02-m truncate">{item.title}</span>
+                      <span className="text-b03-m lg:text-b02-m truncate">{item.title}</span>
                     </div>
                     <span
-                      className={`text-b03-r ${item.recruitmentStatus === 'RECRUITING' ? 'text-green-600' : 'text-gray-400'}`}
+                      className={`text-b03-r shrink-0 ${item.recruitmentStatus === 'RECRUITING' ? 'text-green-600' : 'text-gray-400'}`}
                     >
                       {item.recruitmentStatus === 'RECRUITING' ? '모집중' : '마감'}
                     </span>

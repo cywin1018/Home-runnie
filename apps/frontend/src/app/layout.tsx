@@ -18,11 +18,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="font-sans">
+      <body className="font-sans bg-gray-50">
         <Providers>
           <div className="min-h-screen flex flex-col">
             <Header />
-            <div className="max-w-[1440px] mx-auto w-full flex-1 px-[120px]">
+            <div className="max-w-[1440px] mx-auto w-full flex-1 px-4 sm:px-6 md:px-10 lg:px-20 xl:px-[120px]">
               <main>{children}</main>
             </div>
             <Footer />
