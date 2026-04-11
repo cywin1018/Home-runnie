@@ -41,7 +41,7 @@ const BgmIcon = ({ className, ...props }: React.SVGProps<SVGSVGElement>) => (
 );
 
 const tagVariants = cva(
-  'inline-flex items-center gap-3 rounded-[100px] px-4 py-2 whitespace-nowrap w-auto select-none transition-colors outline outline-1 outline-offset-[-1px] cursor-pointer',
+  'inline-flex items-center gap-1.5 sm:gap-3 rounded-[100px] px-2.5 sm:px-4 py-1 sm:py-2 whitespace-nowrap w-auto select-none transition-colors outline outline-1 outline-offset-[-1px] cursor-pointer',
   {
     variants: {
       state: {
@@ -49,9 +49,9 @@ const tagVariants = cva(
         selected: 'bg-green-50 outline-main-green text-main-green',
       },
       size: {
-        sm: 'text-sm',
-        md: 'text-base',
-        lg: 'text-lg',
+        sm: 'text-xs sm:text-sm',
+        md: 'text-xs sm:text-base',
+        lg: 'text-sm sm:text-lg',
       },
     },
     defaultVariants: {
@@ -72,7 +72,7 @@ export const BgmTag = React.forwardRef<HTMLDivElement, BgmTagProps>(
     const s = selected ? 'selected' : (state ?? 'default');
     return (
       <div ref={ref} className={cn(tagVariants({ state: s, size }), className)} {...props}>
-        <BgmIcon className="h-5 w-5 shrink-0" />
+        <BgmIcon className="h-3.5 w-3.5 sm:h-5 sm:w-5 shrink-0" />
         <span className="font-normal">{text}</span>
       </div>
     );

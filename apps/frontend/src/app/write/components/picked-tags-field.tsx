@@ -21,7 +21,7 @@ export default function PickedTagsField({ value, onChange }: PickedTagsFieldProp
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-1.5 sm:gap-3">
         {PICKED_TAG_OPTIONS.slice(0, 5).map((option) => (
           <BgmTag
             key={option.value}
@@ -32,7 +32,7 @@ export default function PickedTagsField({ value, onChange }: PickedTagsFieldProp
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-1.5 sm:gap-3">
         {PICKED_TAG_OPTIONS.slice(5).map((option) => (
           <BgmTag
             key={option.value}

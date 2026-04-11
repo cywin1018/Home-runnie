@@ -14,10 +14,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
         unstyled: true,
         classNames: {
           toast:
-            'px-7 py-4 bg-stone-950 rounded-[100px] flex flex-row items-center gap-6 shadow-lg w-max group-[[data-x-position=center]]:left-0 group-[[data-x-position=center]]:right-0 group-[[data-x-position=center]]:mx-auto',
-          icon: 'flex justify-center items-center w-6 h-6',
-          title: "text-white text-base font-medium font-['Pretendard'] leading-6 whitespace-nowrap",
-          description: 'text-neutral-400 text-sm',
+            'px-4 py-3 sm:px-7 sm:py-4 bg-stone-950 rounded-[100px] flex flex-row items-center gap-3 sm:gap-6 shadow-lg w-max max-w-[calc(100vw-2rem)] group-[[data-x-position=center]]:left-0 group-[[data-x-position=center]]:right-0 group-[[data-x-position=center]]:mx-auto',
+          icon: 'flex justify-center items-center w-5 h-5 sm:w-6 sm:h-6 shrink-0',
+          title:
+            "text-white text-sm sm:text-base font-medium font-['Pretendard'] leading-5 sm:leading-6 whitespace-normal sm:whitespace-nowrap break-keep",
+          description: 'text-neutral-400 text-xs sm:text-sm',
           content: 'flex-1 justify-start',
         },
       }}

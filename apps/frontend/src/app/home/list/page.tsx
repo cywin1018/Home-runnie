@@ -38,15 +38,13 @@ const getStatusFromItem = (item: unknown): RowStatus => {
 export default function RecruitmentListPage() {
   const router = useRouter();
   const [page, setPage] = useState(1);
-  const [activeInfoTab, setActiveInfoTab] = useState<InfoTab>('game');
+  const [activeInfoTab, setActiveInfoTab] = useState<InfoTab | null>('game');
   const [gameDate, setGameDate] = useState<Date | null>(null);
   const [stadium, setStadium] = useState<Stadium | ''>('');
   const [matchTeam, setMatchTeam] = useState<Team | ''>('');
   const [headcount, setHeadcount] = useState('');
   const [ticketStatus, setTicketStatus] = useState<'have' | 'need' | ''>('');
   const [favTeam, setFavTeam] = useState<Team | ''>('');
-  const [gender, setGender] = useState<'F' | 'M' | ''>('');
-  const [prefGender, setPrefGender] = useState<'F' | 'M' | 'ANY' | ''>('');
   const [picked, setPicked] = useState<string[]>([]);
   const pageSize = 6;
   const filters = useMemo(
@@ -59,23 +57,9 @@ export default function RecruitmentListPage() {
       headcount: headcount.trim() || undefined,
       ticketStatus: ticketStatus || undefined,
       favTeam: favTeam || undefined,
-      gender: gender || undefined,
-      prefGender: prefGender || undefined,
       picked: picked.length > 0 ? picked : undefined,
     }),
-    [
-      page,
-      pageSize,
-      gameDate,
-      stadium,
-      matchTeam,
-      headcount,
-      ticketStatus,
-      favTeam,
-      gender,
-      prefGender,
-      picked,
-    ],
+    [page, pageSize, gameDate, stadium, matchTeam, headcount, ticketStatus, favTeam, picked],
   );
   const { data, isLoading } = useRecruitmentPostsQuery(filters);
   const posts: RecruitmentPostItemResponse[] = data?.data ?? [];
@@ -93,60 +77,39 @@ export default function RecruitmentListPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [gameDate, stadium, matchTeam, headcount, ticketStatus, favTeam, gender, prefGender, picked]);
+  }, [gameDate, stadium, matchTeam, headcount, ticketStatus, favTeam, picked]);
 
   return (
-    <main className="w-full pb-24">
-      <div className="mx-auto flex w-full max-w-[1200px] flex-col items-center gap-16 pt-16">
-        <div className="w-full space-y-7">
-          <h1 className="text-4xl font-bold leading-[54.4px] text-stone-950">직관 메이트 구하기</h1>
+    <main className="w-full pb-12 lg:pb-24">
+      <div className="mx-auto flex w-full max-w-[1200px] flex-col items-center gap-8 lg:gap-16 pt-8 lg:pt-16">
+        <div className="w-full space-y-5 lg:space-y-7">
+          <h1 className="text-2xl lg:text-4xl font-bold leading-tight lg:leading-[54.4px] text-stone-950">
+            직관 메이트 구하기
+          </h1>
 
-          <div className="rounded-[20px] bg-neutral-50 p-7">
-            <div className="flex items-center gap-2.5">
-              <CtaButton
-                type="button"
-                variant="outline"
-                size="md"
-                onClick={() => setActiveInfoTab('game')}
-                className={`h-auto rounded-none border-0 px-5 py-3.5 text-xl font-semibold leading-7 shadow-none ${
-                  activeInfoTab === 'game'
-                    ? 'border-b border-stone-950 text-stone-950 hover:bg-transparent'
-                    : 'text-neutral-400 hover:bg-transparent'
-                }`}
-              >
-                경기정보
-              </CtaButton>
-              <CtaButton
-                type="button"
-                variant="outline"
-                size="md"
-                onClick={() => setActiveInfoTab('recruit')}
-                className={`h-auto rounded-none border-0 px-5 py-3.5 text-xl font-semibold leading-7 shadow-none ${
-                  activeInfoTab === 'recruit'
-                    ? 'border-b border-stone-950 text-stone-950 hover:bg-transparent'
-                    : 'text-neutral-400 hover:bg-transparent'
-                }`}
-              >
-                모집 정보
-              </CtaButton>
-              <CtaButton
-                type="button"
-                variant="outline"
-                size="md"
-                onClick={() => setActiveInfoTab('author')}
-                className={`h-auto rounded-none border-0 px-5 py-3.5 text-xl font-semibold leading-7 shadow-none ${
-                  activeInfoTab === 'author'
-                    ? 'border-b border-stone-950 text-stone-950 hover:bg-transparent'
-                    : 'text-neutral-400 hover:bg-transparent'
-                }`}
-              >
-                작성자 정보
-              </CtaButton>
+          <div className="rounded-[20px] bg-neutral-50 p-4 lg:p-7">
+            <div className="flex items-center gap-1 lg:gap-2.5 overflow-x-auto">
+              {(['game', 'recruit', 'author'] as const).map((tab) => (
+                <CtaButton
+                  key={tab}
+                  type="button"
+                  variant="outline"
+                  size="md"
+                  onClick={() => setActiveInfoTab((prev) => (prev === tab ? null : tab))}
+                  className={`h-auto rounded-none border-0 px-3 lg:px-5 py-2 lg:py-3.5 text-sm lg:text-xl font-semibold leading-6 lg:leading-7 shadow-none shrink-0 ${
+                    activeInfoTab === tab
+                      ? 'border-b border-stone-950 text-stone-950 hover:bg-transparent'
+                      : 'text-neutral-400 hover:bg-transparent'
+                  }`}
+                >
+                  {{ game: '경기정보', recruit: '모집 정보', author: '작성자 정보' }[tab]}
+                </CtaButton>
+              ))}
             </div>
 
-            <div className="mt-7">
+            <div className="mt-5 lg:mt-7">
               {activeInfoTab === 'game' && (
-                <div className="grid grid-cols-3 items-center gap-9">
+                <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-4 lg:gap-9">
                   <DateSelect
                     value={gameDate}
                     onChange={setGameDate}
@@ -171,20 +134,24 @@ export default function RecruitmentListPage() {
               )}
 
               {activeInfoTab === 'recruit' && (
-                <div className="flex flex-wrap items-start gap-12">
-                  <div className="w-80">
-                    <p className="mb-5 text-xl font-semibold leading-7 text-zinc-800">모집 인원</p>
+                <div className="flex flex-col md:flex-row flex-wrap items-start gap-6 lg:gap-12">
+                  <div className="w-full md:w-80">
+                    <p className="mb-2 lg:mb-5 text-base lg:text-xl font-semibold leading-6 lg:leading-7 text-zinc-800">
+                      모집 인원
+                    </p>
                     <input
                       value={headcount}
                       onChange={(e) => setHeadcount(e.target.value)}
                       inputMode="numeric"
                       pattern="[0-9]*"
                       placeholder="00"
-                      className="h-14 w-80 rounded-2xl border border-zinc-200 bg-neutral-50 px-5 text-lg placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-zinc-300"
+                      className="h-12 lg:h-14 w-full md:w-80 rounded-xl lg:rounded-2xl border border-zinc-200 bg-neutral-50 px-4 lg:px-5 text-base lg:text-lg placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-zinc-300"
                     />
                   </div>
                   <div>
-                    <p className="mb-5 text-xl font-semibold leading-7 text-zinc-800">티켓 현황</p>
+                    <p className="mb-2 lg:mb-5 text-base lg:text-xl font-semibold leading-6 lg:leading-7 text-zinc-800">
+                      티켓 현황
+                    </p>
                     <RadioGroup
                       name="ticketStatus"
                       value={ticketStatus}
@@ -201,10 +168,10 @@ export default function RecruitmentListPage() {
               )}
 
               {activeInfoTab === 'author' && (
-                <div className="space-y-6">
-                  <div className="flex flex-wrap items-start gap-12">
-                    <div className="w-[300px]">
-                      <p className="mb-5 text-xl font-semibold leading-7 text-zinc-800">
+                <div className="space-y-5 lg:space-y-6">
+                  <div className="flex flex-col md:flex-row flex-wrap items-start gap-5 lg:gap-12">
+                    <div className="w-full md:w-[300px]">
+                      <p className="mb-2 lg:mb-5 text-base lg:text-xl font-semibold leading-6 lg:leading-7 text-zinc-800">
                         응원하는 팀
                       </p>
                       <TeamDropdown
@@ -212,44 +179,15 @@ export default function RecruitmentListPage() {
                         placeholder="팀 선택"
                         value={favTeam || null}
                         onChange={(next) => setFavTeam(next as Team)}
-                        className="w-[300px]"
-                      />
-                    </div>
-                    <div>
-                      <p className="mb-5 text-xl font-semibold leading-7 text-zinc-800">성별</p>
-                      <RadioGroup
-                        name="authorGender"
-                        value={gender}
-                        onChange={(next) => setGender(next === 'F' || next === 'M' ? next : '')}
-                        options={[
-                          { value: 'F', label: '여자' },
-                          { value: 'M', label: '남자' },
-                        ]}
-                      />
-                    </div>
-                    <div>
-                      <p className="mb-5 text-xl font-semibold leading-7 text-zinc-800">
-                        선호하는 성별
-                      </p>
-                      <RadioGroup
-                        name="prefGender"
-                        value={prefGender}
-                        onChange={(next) =>
-                          setPrefGender(next === 'F' || next === 'M' || next === 'ANY' ? next : '')
-                        }
-                        direction="row"
-                        gapClassName="gap-10"
-                        options={[
-                          { value: 'F', label: '여자' },
-                          { value: 'M', label: '남자' },
-                          { value: 'ANY', label: '상관없음' },
-                        ]}
+                        className="w-full"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <p className="mb-5 text-xl font-semibold leading-7 text-zinc-800">성향</p>
+                    <p className="mb-2 lg:mb-5 text-base lg:text-xl font-semibold leading-6 lg:leading-7 text-zinc-800">
+                      성향
+                    </p>
                     <PickedTagsField value={picked} onChange={setPicked} />
                   </div>
                 </div>
@@ -258,8 +196,10 @@ export default function RecruitmentListPage() {
           </div>
         </div>
 
+        {/* 데스크탑: 7열 테이블 / 모바일: 카드형 리스트 */}
         <div className="w-full rounded-[20px] bg-neutral-50">
-          <div className="rounded-t-2xl bg-neutral-100 px-10 py-6">
+          {/* 테이블 헤더 - 데스크탑만 */}
+          <div className="hidden lg:block rounded-t-2xl bg-neutral-100 px-10 py-6">
             <div className="grid grid-cols-[70px_220px_120px_1fr_120px_120px_120px] items-center gap-4 text-lg text-zinc-600">
               <p>번호</p>
               <p>경기 팀</p>
@@ -273,9 +213,9 @@ export default function RecruitmentListPage() {
 
           <div>
             {listLoading ? (
-              <div className="px-10 py-8 text-zinc-500">불러오는 중...</div>
+              <div className="px-5 lg:px-10 py-8 text-zinc-500">불러오는 중...</div>
             ) : posts.length === 0 ? (
-              <div className="px-10 py-8 text-zinc-500">등록된 모집글이 없습니다.</div>
+              <div className="px-5 lg:px-10 py-8 text-zinc-500">등록된 모집글이 없습니다.</div>
             ) : (
               posts.map((item, index) => {
                 const status = getStatusFromItem(item);
@@ -285,18 +225,18 @@ export default function RecruitmentListPage() {
                     : 'bg-indigo-50 text-blue-600';
                 const authorNickname = item.authorNickname ?? '-';
                 const rowNumber = (page - 1) * pageSize + index + 1;
+                const teamLabel = `${TeamDescription[item.teamHome as Team] ?? item.teamHome} vs ${TeamDescription[item.teamAway as Team] ?? item.teamAway}`;
 
                 return (
                   <div
                     key={item.id}
                     onClick={() => router.push(`/home/${item.id}`)}
-                    className="border-t border-zinc-200 px-10 py-5 first:border-t-0 cursor-pointer hover:bg-gray-50 transition-colors"
+                    className="border-t border-zinc-200 px-5 lg:px-10 py-4 lg:py-5 first:border-t-0 cursor-pointer hover:bg-gray-50 transition-colors"
                   >
-                    <div className="grid grid-cols-[70px_220px_120px_1fr_120px_120px_120px] items-center gap-4">
+                    {/* 데스크탑: 7열 그리드 */}
+                    <div className="hidden lg:grid grid-cols-[70px_220px_120px_1fr_120px_120px_120px] items-center gap-4">
                       <p className="text-lg text-zinc-500">{String(rowNumber).padStart(2, '0')}</p>
-                      <p className="truncate text-lg font-medium text-zinc-800">
-                        {`${TeamDescription[item.teamHome as Team] ?? item.teamHome} vs ${TeamDescription[item.teamAway as Team] ?? item.teamAway}`}
-                      </p>
+                      <p className="truncate text-lg font-medium text-zinc-800">{teamLabel}</p>
                       <p className="text-lg text-zinc-800">{formatGameDate(item.gameDate)}</p>
                       <p className="truncate text-lg text-zinc-800">{item.title}</p>
                       <div className="flex justify-center">
@@ -311,6 +251,23 @@ export default function RecruitmentListPage() {
                         {formatGameDate(item.createdAt)}
                       </p>
                     </div>
+
+                    {/* 모바일: 카드형 */}
+                    <div className="lg:hidden flex flex-col gap-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-b03-r text-zinc-500">{teamLabel}</span>
+                        <span
+                          className={`rounded-md px-2.5 py-1 text-xs font-medium ${statusClass}`}
+                        >
+                          {status}
+                        </span>
+                      </div>
+                      <p className="text-b02-m text-zinc-800 truncate">{item.title}</p>
+                      <div className="flex items-center gap-3 text-c01-r text-zinc-400">
+                        <span>{formatGameDate(item.gameDate)}</span>
+                        <span>{authorNickname}</span>
+                      </div>
+                    </div>
                   </div>
                 );
               })
@@ -318,10 +275,10 @@ export default function RecruitmentListPage() {
           </div>
         </div>
 
-        <div className="inline-flex items-center gap-7">
+        <div className="inline-flex items-center gap-4 lg:gap-7">
           <button
             type="button"
-            className="text-2xl text-stone-950 disabled:text-neutral-400"
+            className="text-xl lg:text-2xl text-stone-950 disabled:text-neutral-400"
             disabled={page === 1}
             onClick={() => setPage((prev) => Math.max(1, prev - 1))}
           >
@@ -333,7 +290,7 @@ export default function RecruitmentListPage() {
                 key={num}
                 type="button"
                 onClick={() => setPage(num)}
-                className={`rounded-md px-4 py-2.5 text-base ${
+                className={`rounded-md px-3 lg:px-4 py-2 lg:py-2.5 text-sm lg:text-base ${
                   num === page ? 'bg-zinc-200 text-zinc-900' : 'text-zinc-500'
                 }`}
               >
@@ -343,7 +300,7 @@ export default function RecruitmentListPage() {
           </div>
           <button
             type="button"
-            className="text-2xl text-stone-950 disabled:text-neutral-400"
+            className="text-xl lg:text-2xl text-stone-950 disabled:text-neutral-400"
             disabled={page === totalPages}
             onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
           >
