@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import ChatList from './components/ChatList';
+import ChatList from './components/chat-list/ChatList';
 import { ChatRoomsContext } from '@/stores/ChatRoomsContext';
 import { ChatSocketProvider } from '@/hooks/chat/ChatSocketProvider';
 import { useChatRooms } from '@/hooks/chat/useChatRooms';

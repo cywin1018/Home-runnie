@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import ChatInfo from './ChatInfo';
 import ChatInput from './ChatInput';
 import MessageBubble from './MessageBubble';
-import ChatInfoSidebar from './ChatInfoSidebar';
+import ChatInfoSidebar from '../sidebar/ChatInfoSidebar';
 import ReportModal, { ReportParticipant } from '@/shared/ui/modal/ReportModal';
 import { useChatRooms } from '@/stores/ChatRoomsContext';
 import { ChatRoomResponse, ChatRoomMemberRole, TeamDescription, Team } from '@homerunnie/shared';

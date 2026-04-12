@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, Mail, Menu } from 'lucide-react';
 import { ChatRoomMemberRole } from '@homerunnie/shared';
-import JoinRequestDropdown from './JoinRequestDropdown';
+import JoinRequestDropdown from '../join-request/JoinRequestDropdown';
 
 interface ChatInfoProps {
   title: string;

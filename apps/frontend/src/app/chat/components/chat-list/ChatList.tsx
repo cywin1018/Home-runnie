@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { ChatRoomMemberRole } from '@homerunnie/shared';
-import { ChatListItem } from '../layout';
+import { ChatListItem } from '../../layout';
 
 interface ChatListProps {
   chatRooms?: ChatListItem[];
