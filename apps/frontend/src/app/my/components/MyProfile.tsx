@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useMyProfileProtectedQuery } from '@/hooks/my/useProfileQuery';
-import { Team, TeamDescription } from '@homerunnie/shared';
+import { Team, TeamDescription, TeamLogoUrl } from '@homerunnie/shared';
 
 export default function MyProfile() {
   const { data: myProfile, isLoading } = useMyProfileProtectedQuery();
@@ -40,10 +40,23 @@ export default function MyProfile() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-2 w-full">
             <div className="flex flex-col items-center gap-2">
               <p className="text-b02-r lg:text-b01 text-gray-600 font-weight-r">응원하는 팀</p>
-              <div className="w-14 h-14 lg:w-18 lg:h-18 bg-gray-200 rounded-2xl"></div>
-              <p className="font-weight-r text-b02-r lg:text-b01 leading-150">
-                {myProfile?.supportTeam ? TeamDescription[myProfile.supportTeam] : '-'}
-              </p>
+              {myProfile?.supportTeam ? (
+                <div className="flex flex-col items-center gap-2">
+                  <div className="relative h-14 w-14 overflow-hidden rounded-2xl bg-gray-100 lg:h-[72px] lg:w-[72px]">
+                    <Image
+                      src={TeamLogoUrl[myProfile.supportTeam as Team]}
+                      alt={TeamDescription[myProfile.supportTeam as Team]}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <p className="font-weight-r text-b02-r lg:text-b01 leading-150">
+                    {TeamDescription[myProfile.supportTeam as Team]}
+                  </p>
+                </div>
+              ) : (
+                <p className="font-weight-r text-b02-r lg:text-b01 leading-150">-</p>
+              )}
             </div>
             <div className="flex flex-col items-center gap-2">
               <p className="text-b02-r lg:text-b01 text-gray-600 font-weight-r">로그인 방법</p>
