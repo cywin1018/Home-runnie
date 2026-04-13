@@ -86,7 +86,7 @@ export default function DateSelect({
         aria-haspopup="dialog"
         aria-expanded={open}
       >
-        <div className="pointer-events-none absolute inset-0 z-0 rounded-2xl border border-zinc-200 bg-neutral-50" />
+        <div className="pointer-events-none absolute inset-0 z-0 rounded-2xl bg-neutral-50" />
         <span
           className={clsx(
             'z-10 text-lg font-normal leading-relaxed',
@@ -108,7 +108,7 @@ export default function DateSelect({
 
       {open && pos && (
         <>
-          <div className="fixed inset-0 z-[49]" onClick={() => setOpen(false)} />
+          <div className="fixed inset-0 z-49" onClick={() => setOpen(false)} />
           <CalendarPopup
             style={{ left: pos.left, top: pos.top }}
             cursor={cursor}

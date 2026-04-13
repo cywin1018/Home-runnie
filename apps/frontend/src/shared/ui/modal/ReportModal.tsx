@@ -83,7 +83,7 @@ const ReportModal = ({ isOpen, onClose, participants }: ReportModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[670px] p-8">
+      <DialogContent className="sm:max-w-[670px] rounded-[20px] p-8">
         <DialogHeader className="mb-4">
           <DialogTitle className="flex items-center gap-2 text-xl font-bold">
             <Image src="/icons/report.svg" alt="신고 아이콘" width={24} height={24} />
@@ -103,7 +103,11 @@ const ReportModal = ({ isOpen, onClose, participants }: ReportModalProps) => {
               {isObjectParticipants(participants)
                 ? participants.map((p) => (
                     <div key={p.memberId} className="flex items-center space-x-2">
-                      <RadioGroupItem value={String(p.memberId)} id={`report-${p.memberId}`} />
+                      <RadioGroupItem
+                        value={String(p.memberId)}
+                        id={`report-${p.memberId}`}
+                        className="border-main-green data-[state=checked]:border-main-green [&_[data-slot=radio-group-indicator]_svg]:fill-main-green"
+                      />
                       <Label htmlFor={`report-${p.memberId}`} className="text-b01-r">
                         {p.nickname}
                       </Label>
@@ -111,7 +115,11 @@ const ReportModal = ({ isOpen, onClose, participants }: ReportModalProps) => {
                   ))
                 : participants.map((name) => (
                     <div key={name} className="flex items-center space-x-2">
-                      <RadioGroupItem value={name} id={name} />
+                      <RadioGroupItem
+                        value={name}
+                        id={name}
+                        className="border-main-green data-[state=checked]:border-main-green [&_[data-slot=radio-group-indicator]_svg]:fill-main-green"
+                      />
                       <Label htmlFor={name} className="text-b01-r">
                         {name}
                       </Label>
@@ -125,7 +133,10 @@ const ReportModal = ({ isOpen, onClose, participants }: ReportModalProps) => {
               사유
             </Label>
             <Select value={reason} onValueChange={setReason}>
-              <SelectTrigger id="reason" className="w-[260px] text-b03-r text-muted-foreground">
+              <SelectTrigger
+                id="reason"
+                className="w-[260px] text-b03-r data-placeholder:text-gray-400"
+              >
                 <SelectValue placeholder="신고 사유를 선택해주세요" />
               </SelectTrigger>
               <SelectContent>
@@ -140,7 +151,7 @@ const ReportModal = ({ isOpen, onClose, participants }: ReportModalProps) => {
 
           <Textarea
             placeholder="신고 내용을 입력해주세요."
-            className="min-h-[120px] mb-[44px] placeholder:text-gray-400"
+            className="min-h-[120px] mb-[44px] placeholder:text-b01-r placeholder:text-gray-400"
             value={content}
             onChange={(e) => setContent(e.target.value)}
           />
@@ -148,7 +159,7 @@ const ReportModal = ({ isOpen, onClose, participants }: ReportModalProps) => {
           <Button
             type="button"
             size="lg"
-            className="w-full bg-black text-white text-[18px] h-[70px] hover:bg-gray-800"
+            className="h-[70px] w-full rounded-2xl bg-black text-b01 text-white hover:bg-gray-800"
             disabled={!selectedTarget || !reason || submitting}
             onClick={handleSubmit}
           >

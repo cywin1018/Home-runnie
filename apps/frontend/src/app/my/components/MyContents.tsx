@@ -60,7 +60,7 @@ export default function MyContents() {
         className={`flex flex-row gap-3 py-1 px-4 lg:px-[30px] hover:bg-gray-50 cursor-pointer rounded-lg ${selected === 'written' ? 'bg-gray-100' : ''}`}
         onClick={() => handleSelect('written')}
       >
-        <Image src="/icons/pen.svg" alt="내가 작성한 모집글" width={30} height={30} />
+        <Image src="/icons/pen.svg" alt="내가 작성한 모집글" width={20} height={20} />
         <p className="font-weight-m text-b02-r lg:text-b01 leading-150">내가 작성한 모집글</p>
       </div>
 

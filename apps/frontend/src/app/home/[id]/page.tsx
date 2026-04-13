@@ -11,11 +11,12 @@ import {
 import { useMyProfileQuery } from '@/hooks/my/useProfileQuery';
 import { BgmTag } from '@/shared/ui/tag/bgm-tag';
 import { ReportModal } from '@/shared/ui/modal';
+import { TeamProfileAvatar } from '@/shared/ui/profile/team-profile-avatar';
 import {
   useCreateRecruitmentCommentMutation,
   useUpdateRecruitmentPostStatusMutation,
 } from '@/hooks/post/usePostMutation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getChatRoomByPostId, requestJoinChatRoom } from '@/apis/chat/chat';
 import { showToast, ToastIconType } from '@/shared/ui/toast/toast';
 
@@ -70,6 +71,7 @@ export default function RecruitmentPostDetailPage() {
   const { data: myProfile } = useMyProfileQuery({ retry: false });
   const [isRecruiting, setIsRecruiting] = useState(true);
   const [commentInput, setCommentInput] = useState('');
+  const isSubmittingCommentRef = useRef(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [openCommentMenuId, setOpenCommentMenuId] = useState<number | null>(null);
   const [isApplying, setIsApplying] = useState(false);
@@ -112,8 +114,17 @@ export default function RecruitmentPostDetailPage() {
 
   const handleSubmitComment = () => {
     const trimmed = commentInput.trim();
-    if (!trimmed || isCreatingComment) return;
-    createComment({ content: trimmed });
+    if (!trimmed || isCreatingComment || isSubmittingCommentRef.current) return;
+
+    isSubmittingCommentRef.current = true;
+    createComment(
+      { content: trimmed },
+      {
+        onSettled: () => {
+          isSubmittingCommentRef.current = false;
+        },
+      },
+    );
   };
 
   useEffect(() => {
@@ -176,7 +187,7 @@ export default function RecruitmentPostDetailPage() {
       <div>
         <p className="mb-2 text-b02-sb text-gray-600">제목</p>
         <div className="mb-8 lg:mb-10 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 lg:gap-4">
-          <h1 className="text-t02-b lg:text-t00 font-bold leading-tight text-gray-900 break-words">
+          <h1 className="text-t02-b lg:text-t00 font-bold leading-tight text-gray-900 wrap-break-word">
             {data.title}
           </h1>
           <p className="inline-flex shrink-0 items-center gap-2 text-b03-sb lg:text-b02-sb text-gray-700">
@@ -184,7 +195,16 @@ export default function RecruitmentPostDetailPage() {
             {data.authorNickname ?? '작성자'}
           </p>
         </div>
-
+        <div className="flex justify-end">
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 text-b03-r text-zinc-500 mb-4"
+            onClick={() => setIsReportModalOpen(true)}
+          >
+            <Image src="/icons/alert.svg" alt="" width={16} height={16} aria-hidden />
+            신고하기
+          </button>
+        </div>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <section className="relative rounded-[20px] bg-neutral-50 p-5 lg:h-80 lg:p-[30px] shadow-[0_10.3px_20.6px_rgba(0,0,0,0.03)]">
             <h2 className="text-t04-sb lg:text-t03-sb text-stone-950">경기 정보</h2>
@@ -293,7 +313,7 @@ export default function RecruitmentPostDetailPage() {
               </p>
               <div className="flex flex-wrap gap-2 lg:gap-3">
                 {writerTraits.map((trait) => (
-                  <BgmTag key={trait} text={trait} size="sm" />
+                  <BgmTag key={trait} text={trait} size="sm" className="cursor-default" />
                 ))}
                 {writerTraits.length === 0 ? <p className="text-b03-r text-gray-500">-</p> : null}
               </div>
@@ -360,14 +380,6 @@ export default function RecruitmentPostDetailPage() {
         <section className="mt-12 lg:mt-16">
           <div className="mb-4 flex items-end justify-between">
             <h2 className="text-t03-b lg:text-2xl font-bold text-gray-900">댓글</h2>
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 text-b03-r text-zinc-500"
-              onClick={() => setIsReportModalOpen(true)}
-            >
-              <Image src="/icons/alert.svg" alt="" width={16} height={16} aria-hidden />
-              신고하기
-            </button>
           </div>
 
           <div className="mb-4 flex flex-col sm:flex-row gap-3">
@@ -377,6 +389,7 @@ export default function RecruitmentPostDetailPage() {
               value={commentInput}
               onChange={(e) => setCommentInput(e.target.value)}
               onKeyDown={(e) => {
+                if (e.nativeEvent.isComposing) return;
                 if (e.key === 'Enter') {
                   e.preventDefault();
                   handleSubmitComment();
@@ -401,7 +414,7 @@ export default function RecruitmentPostDetailPage() {
             </button>
           </div>
 
-          <div className="bg-neutral-100 overflow-hidden rounded-2xl border border-zinc-300">
+          <div className="bg-neutral-100 overflow-visible rounded-2xl border border-zinc-300">
             {comments.map((comment, index) => (
               <div
                 key={comment.id}
@@ -410,14 +423,7 @@ export default function RecruitmentPostDetailPage() {
                 } ${index === comments.length - 1 ? 'rounded-bl-2xl rounded-br-2xl' : ''}`}
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <Image
-                    src="/icons/profile.svg"
-                    alt=""
-                    width={20}
-                    height={20}
-                    aria-hidden
-                    className="shrink-0"
-                  />
+                  <TeamProfileAvatar className="h-5 w-5 shrink-0" />
                   <p className="text-b03-sb lg:text-b02-sb text-gray-800 truncate">
                     {comment.authorNickname ?? '익명'}
                   </p>

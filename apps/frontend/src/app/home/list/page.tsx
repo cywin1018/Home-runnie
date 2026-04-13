@@ -118,7 +118,7 @@ export default function RecruitmentListPage() {
                   />
                   <TeamDropdown
                     items={baseBallStadiumItems}
-                    placeholder="경기하는 구장을 선택해주세요"
+                    placeholder="경기하는 구장 선택"
                     value={stadium || null}
                     onChange={(next) => setStadium(next as Stadium)}
                     className="w-full"
@@ -196,9 +196,7 @@ export default function RecruitmentListPage() {
           </div>
         </div>
 
-        {/* 데스크탑: 7열 테이블 / 모바일: 카드형 리스트 */}
-        <div className="w-full rounded-[20px] bg-neutral-50">
-          {/* 테이블 헤더 - 데스크탑만 */}
+        <div className="w-full rounded-[20px]">
           <div className="hidden lg:block rounded-t-2xl bg-neutral-100 px-10 py-6">
             <div className="grid grid-cols-[70px_220px_120px_1fr_120px_120px_120px] items-center gap-4 text-lg text-zinc-600">
               <p>번호</p>
@@ -231,10 +229,9 @@ export default function RecruitmentListPage() {
                   <div
                     key={item.id}
                     onClick={() => router.push(`/home/${item.id}`)}
-                    className="border-t border-zinc-200 px-5 lg:px-10 py-4 lg:py-5 first:border-t-0 cursor-pointer hover:bg-gray-50 transition-colors"
+                    className="bg-neutral-50 border-t border-zinc-200 px-5 lg:px-10 py-4 lg:py-5 first:border-t-0 cursor-pointer hover:bg-gray-50 transition-colors"
                   >
-                    {/* 데스크탑: 7열 그리드 */}
-                    <div className="hidden lg:grid grid-cols-[70px_220px_120px_1fr_120px_120px_120px] items-center gap-4">
+                    <div className="hidden lg:grid grid-cols-[70px_220px_120px_1fr_120px_120px_120px] items-center gap-4 ">
                       <p className="text-lg text-zinc-500">{String(rowNumber).padStart(2, '0')}</p>
                       <p className="truncate text-lg font-medium text-zinc-800">{teamLabel}</p>
                       <p className="text-lg text-zinc-800">{formatGameDate(item.gameDate)}</p>
@@ -252,7 +249,6 @@ export default function RecruitmentListPage() {
                       </p>
                     </div>
 
-                    {/* 모바일: 카드형 */}
                     <div className="lg:hidden flex flex-col gap-1.5">
                       <div className="flex items-center justify-between">
                         <span className="text-b03-r text-zinc-500">{teamLabel}</span>
