@@ -26,7 +26,7 @@ const ChatInput = ({ onSend }: ChatInputProps) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mt-6 flex items-center gap-2 bg-white p-2 rounded-lg shadow-sm"
+      className="flex items-center gap-2 bg-white p-2 rounded-lg shadow-sm"
     >
       <input
         type="text"

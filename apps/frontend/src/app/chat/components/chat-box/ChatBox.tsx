@@ -7,6 +7,7 @@ import ChatInput from './ChatInput';
 import MessageBubble from './MessageBubble';
 import ChatInfoSidebar from '../sidebar/ChatInfoSidebar';
 import ReportModal, { ReportParticipant } from '@/shared/ui/modal/ReportModal';
+import { MemberProfileModal } from '@/shared/ui/modal';
 import { useChatRooms } from '@/stores/ChatRoomsContext';
 import { ChatRoomResponse, ChatRoomMemberRole } from '@homerunnie/shared';
 import { useSocket } from '@/hooks/chat/useSocket';
@@ -43,6 +44,10 @@ const ChatBox = ({ roomId }: { roomId: string }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [profileModalTarget, setProfileModalTarget] = useState<{
+    nickname: string;
+    supportTeam: string | null;
+  } | null>(null);
 
   const {
     messages,
@@ -89,16 +94,16 @@ const ChatBox = ({ roomId }: { roomId: string }) => {
           joinRequestCount={joinRequestCount}
           onJoinRequestOpen={resetJoinRequestCount}
         />
-        <section className="flex flex-col flex-1 min-h-0 py-6 transition-all duration-300 ease-in-out">
+        <section className="flex flex-col flex-1 min-h-0 pb-6 transition-all duration-300 ease-in-out">
           <ReportModal
             isOpen={isReportModalOpen}
             onClose={() => setIsReportModalOpen(false)}
             participants={reportParticipants}
           />
 
-          <div className="grow flex flex-col overflow-y-auto min-h-0">
+          <div className="grow overflow-y-auto min-h-0">
             <div
-              className={`mt-auto flex flex-col gap-4 ${
+              className={`flex flex-col justify-end gap-4 min-h-full ${
                 isSidebarOpen ? 'px-4 lg:px-[30px]' : 'px-4 lg:px-8'
               }`}
             >
@@ -121,7 +126,7 @@ const ChatBox = ({ roomId }: { roomId: string }) => {
                         </span>
                       </div>
                     )}
-                    <MessageBubble msg={msg} />
+                    <MessageBubble msg={msg} onProfileClick={setProfileModalTarget} />
                   </Fragment>
                 );
               })}
@@ -143,6 +148,13 @@ const ChatBox = ({ roomId }: { roomId: string }) => {
         matchTeam={roomInfo.matchTeam}
         role={roomInfo.role}
         roomId={roomId}
+      />
+
+      <MemberProfileModal
+        isOpen={!!profileModalTarget}
+        onClose={() => setProfileModalTarget(null)}
+        nickname={profileModalTarget?.nickname ?? ''}
+        supportTeam={profileModalTarget?.supportTeam ?? null}
       />
     </div>
   );
