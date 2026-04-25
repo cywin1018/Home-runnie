@@ -19,6 +19,23 @@ export const formatKoreanTime = (date: Date): string => {
   });
 };
 
+export const formatKoreanFullDate = (date: Date): string => {
+  return date.toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    weekday: 'long',
+  });
+};
+
+export const isSameDay = (a: Date, b: Date): boolean => {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+};
+
 export const formatTeamName = (team: string | null): string => {
   if (!team) return '-';
   return TeamDescription[team as Team] ?? team;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ChatInfo from './ChatInfo';
 import ChatInput from './ChatInput';
@@ -11,7 +11,7 @@ import { useChatRooms } from '@/stores/ChatRoomsContext';
 import { ChatRoomResponse, ChatRoomMemberRole } from '@homerunnie/shared';
 import { useSocket } from '@/hooks/chat/useSocket';
 import { useChatRoomMembersQuery } from '@/hooks/chat/useChatQuery';
-import { formatKoreanDate, formatTeamName } from '@/lib/format';
+import { formatKoreanDate, formatKoreanFullDate, formatTeamName, isSameDay } from '@/lib/format';
 
 interface RoomInfo {
   title: string;
@@ -103,9 +103,28 @@ const ChatBox = ({ roomId }: { roomId: string }) => {
               }`}
             >
               {!connected && <p className="text-center text-sm text-gray-400">서버에 연결 중...</p>}
-              {messages.map((msg) => (
-                <MessageBubble key={msg.id} msg={msg} />
-              ))}
+              {messages.map((msg, idx) => {
+                const currentDate = msg.createdAt ? new Date(msg.createdAt) : null;
+                const isCurrentValid = !!currentDate && !isNaN(currentDate.getTime());
+                const prev = messages[idx - 1];
+                const prevDate = prev?.createdAt ? new Date(prev.createdAt) : null;
+                const isPrevValid = !!prevDate && !isNaN(prevDate.getTime());
+                const showDateDivider =
+                  isCurrentValid && (!isPrevValid || !isSameDay(prevDate!, currentDate!));
+
+                return (
+                  <Fragment key={msg.id}>
+                    {showDateDivider && (
+                      <div className="flex justify-center my-2">
+                        <span className="text-xs text-gray-500 bg-gray-200 rounded-full px-3 py-1">
+                          {formatKoreanFullDate(currentDate!)}
+                        </span>
+                      </div>
+                    )}
+                    <MessageBubble msg={msg} />
+                  </Fragment>
+                );
+              })}
               <div ref={messagesEndRef} />
             </div>
           </div>
